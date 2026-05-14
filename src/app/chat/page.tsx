@@ -28,6 +28,68 @@ interface Message {
   timestamp?: number;
 }
 
+// 轻量Markdown渲染组件
+function SimpleMarkdown({ content }: { content: string }) {
+  const lines = content.split("\n");
+  const elements: React.ReactElement[] = [];
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+
+    if (line.startsWith("### ")) {
+      elements.push(
+        <h3 key={i} className="font-bold text-base mt-3 mb-1 text-[#2d2a26]">
+          {renderInline(line.slice(4))}
+        </h3>
+      );
+    } else if (line.startsWith("## ")) {
+      elements.push(
+        <h2 key={i} className="font-bold text-lg mt-4 mb-2 text-[#2d2a26]">
+          {renderInline(line.slice(3))}
+        </h2>
+      );
+    } else if (line.startsWith("# ")) {
+      elements.push(
+        <h1 key={i} className="font-bold text-xl mt-4 mb-2 text-[#2d2a26]">
+          {renderInline(line.slice(2))}
+        </h1>
+      );
+    } else if (line.startsWith("- ") || line.startsWith("* ")) {
+      elements.push(
+        <li key={i} className="ml-4 list-disc text-[#2d2a26]">
+          {renderInline(line.slice(2))}
+        </li>
+      );
+    } else if (line.trim() === "---") {
+      elements.push(<hr key={i} className="my-3 border-[#e8e4df]" />);
+    } else if (line.trim() === "") {
+      elements.push(<div key={i} className="h-2" />);
+    } else {
+      elements.push(
+        <p key={i} className="mb-1 text-[#2d2a26]">
+          {renderInline(line)}
+        </p>
+      );
+    }
+  }
+
+  return <>{elements}</>;
+}
+
+function renderInline(text: string): React.ReactElement {
+  const parts = text.split(/(\*\*[^*]+\*\*)/g);
+  return (
+    <>
+      {parts.map((part, i) => {
+        if (part.startsWith("**") && part.endsWith("**")) {
+          return <strong key={i} className="font-semibold">{part.slice(2, -2)}</strong>;
+        }
+        return <span key={i}>{part}</span>;
+      })}
+    </>
+  );
+}
+
 export default function ChatPage() {
   const [messages, setMessages] = useState<Message[]>([
     { role: "assistant", content: WELCOME_MESSAGE },
@@ -103,7 +165,9 @@ export default function ChatPage() {
       });
 
       if (!response.ok) {
-        throw new Error("API request failed");
+        const errorData = await response.json().catch(() => ({}));
+        const errorMsg = errorData.error || `请求失败 (${response.status})`;
+        throw new Error(errorMsg);
       }
 
       const data = await response.json();
@@ -111,13 +175,14 @@ export default function ChatPage() {
         ...prev,
         { role: "assistant", content: data.content, timestamp: Date.now() },
       ]);
-    } catch {
+    } catch (err: any) {
+      const errorMsg = err?.message || "网络请求失败";
       setMessages((prev) => [
         ...prev,
         {
           role: "assistant",
-          content:
-            "抱歉，我暂时遇到了一些问题。请检查API配置是否正确，或者稍后再试。",
+          content: `抱歉，遇到了一些问题：${errorMsg}。请稍后重试，或刷新页面后再试。`,
+          timestamp: Date.now(),
         },
       ]);
     } finally {
@@ -206,12 +271,16 @@ export default function ChatPage() {
                     : "bg-white border border-[#e8e4df] text-[#2d2a26]"
                 }`}
               >
-                {message.content.split("\n").map((line, i) => (
-                  <span key={i}>
-                    {line}
-                    {i < message.content.split("\n").length - 1 && <br />}
-                  </span>
-                ))}
+                {message.role === "user" ? (
+                  message.content.split("\n").map((line, i) => (
+                    <span key={i}>
+                      {line}
+                      {i < message.content.split("\n").length - 1 && <br />}
+                    </span>
+                  ))
+                ) : (
+                  <SimpleMarkdown content={message.content} />
+                )}
               </div>
             </motion.div>
           ))}
