@@ -69,10 +69,10 @@ export async function POST(req: NextRequest) {
       const relevantKnowledge = searchKnowledge(latestUserMessage);
       if (relevantKnowledge.length > 0) {
         knowledgeContext = `\n\n【相关知识库资料】\n${relevantKnowledge
-          .slice(0, 3)
+          .slice(0, 2)
           .map(
             (k) =>
-              `---\n${k.title}（${k.category}）：\n${k.content.substring(0, 800)}...`
+              `---\n${k.title}（${k.category}）：\n${k.content.substring(0, 400)}...`
           )
           .join("\n")}`;
       }
@@ -97,7 +97,7 @@ export async function POST(req: NextRequest) {
           })),
         ],
         temperature: 0.7,
-        max_tokens: 2000,
+        max_tokens: 1200,
       }),
     });
 
