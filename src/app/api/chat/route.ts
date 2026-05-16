@@ -41,6 +41,7 @@ function getApiKey(): string {
 export async function POST(req: NextRequest) {
   try {
     const { messages } = await req.json();
+const recentMessages = messages.slice(-2); // 只保留最近1轮
 
     if (!messages || !Array.isArray(messages)) {
       return NextResponse.json(

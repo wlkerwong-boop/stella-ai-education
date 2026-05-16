@@ -33,6 +33,12 @@ export default function Home() {
               课程学习
             </Link>
             <Link
+              href="/tools"
+              className="text-sm text-[#5a7a6a] hover:text-[#2d2a26] transition-colors"
+            >
+              学员工具台
+            </Link>
+            <Link
               href="/growth"
               className="text-sm text-[#5a7a6a] hover:text-[#2d2a26] transition-colors"
             >

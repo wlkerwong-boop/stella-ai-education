@@ -16,12 +16,22 @@ import {
   BarChart3,
   Loader2,
   BookOpen,
+  ClipboardList,
+  Eye,
+  EyeOff,
 } from "lucide-react";
 import {
   getAllSessions,
   getUserStats,
   ChatSession,
 } from "@/lib/storage";
+import {
+  getToolRecordsByUser,
+  getToolStats,
+  getEmotionHistory,
+  ToolRecord,
+  getCurrentStudent,
+} from "@/lib/tools-storage";
 
 interface AnalysisResult {
   analysis: string;
@@ -46,6 +56,8 @@ export default function GrowthPage() {
   const [analysis, setAnalysis] = useState<AnalysisResult | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [currentStage, setCurrentStage] = useState(0);
+  const [toolRecords, setToolRecords] = useState<ToolRecord[]>([]);
+  const [toolStats, setToolStats] = useState({ totalRecords: 0, byType: {} as Record<string, number> });
 
   useEffect(() => {
     const allSessions = getAllSessions();
@@ -58,6 +70,14 @@ export default function GrowthPage() {
     else if (totalQ >= 10) setCurrentStage(2);
     else if (totalQ >= 3) setCurrentStage(1);
     else setCurrentStage(0);
+
+    // 加载工具记录
+    const student = getCurrentStudent();
+    if (student) {
+      const records = getToolRecordsByUser(student.userId);
+      setToolRecords(records.slice(0, 5));
+      setToolStats(getToolStats(student.userId));
+    }
   }, []);
 
   const generateAnalysis = async () => {
@@ -173,7 +193,7 @@ export default function GrowthPage() {
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8"
+              className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8"
             >
               {[
                 {
@@ -196,6 +216,13 @@ export default function GrowthPage() {
                   value: learningDays,
                   color: "#8b7355",
                   bg: "#f0ebe4",
+                },
+                {
+                  icon: ClipboardList,
+                  label: "工具记录",
+                  value: toolStats.totalRecords,
+                  color: "#e88d5a",
+                  bg: "#fce8d8",
                 },
                 {
                   icon: Zap,
@@ -422,6 +449,80 @@ export default function GrowthPage() {
                 ))}
               </div>
             </motion.div>
+
+            {/* 工具记录 */}
+            {toolRecords.length > 0 && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.5 }}
+                className="bg-white rounded-2xl border border-[#e8e4df] p-6"
+              >
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-2">
+                    <ClipboardList className="w-5 h-5 text-[#e88d5a]" />
+                    <h3 className="font-semibold text-[#2d2a26]">最近工具记录</h3>
+                  </div>
+                  <Link
+                    href="/tools"
+                    className="text-xs text-[#5a7a6a] hover:text-[#2d2a26] transition-colors"
+                  >
+                    去工具台 →
+                  </Link>
+                </div>
+                <div className="space-y-3">
+                  {toolRecords.map((record) => {
+                    const toolIcons: Record<string, string> = {
+                      orid: "🧠",
+                      emotion: "🌡️",
+                      iceberg: "🧊",
+                      "action-card": "🧭",
+                      character: "⭐",
+                    };
+                    const toolNames: Record<string, string> = {
+                      orid: "ORID反思",
+                      emotion: "情绪打卡",
+                      iceberg: "冰山日记",
+                      "action-card": "践行卡",
+                      character: "品格自测",
+                    };
+                    return (
+                      <div
+                        key={record.id}
+                        className="p-3 rounded-xl bg-[#faf8f5] border border-[#e8e4df] hover:border-[#e88d5a]/30 transition-colors"
+                      >
+                        <div className="flex items-start justify-between gap-4">
+                          <div className="flex items-center gap-2 min-w-0">
+                            <span className="text-lg">{toolIcons[record.toolType] || "📋"}</span>
+                            <div className="min-w-0">
+                              <div className="text-sm font-medium text-[#2d2a26] truncate">
+                                {record.title}
+                              </div>
+                              <div className="text-xs text-[#9a9590]">
+                                {toolNames[record.toolType] || record.toolType} · {new Date(record.createdAt).toLocaleDateString("zh-CN", { month: "short", day: "numeric" })}
+                              </div>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2 flex-shrink-0">
+                            {record.visibility === "shared-with-stella" ? (
+                              <span className="flex items-center gap-1 px-2 py-1 rounded-md bg-[#e8f0ec] text-[#5a7a6a] text-xs">
+                                <Eye className="w-3 h-3" />
+                                Stella可见
+                              </span>
+                            ) : (
+                              <span className="flex items-center gap-1 px-2 py-1 rounded-md bg-[#f5f0eb] text-[#9a9590] text-xs">
+                                <EyeOff className="w-3 h-3" />
+                                仅自己
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </motion.div>
+            )}
           </>
         )}
       </main>
