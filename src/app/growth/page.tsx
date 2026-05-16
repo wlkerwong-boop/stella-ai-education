@@ -504,7 +504,11 @@ export default function GrowthPage() {
                             </div>
                           </div>
                           <div className="flex items-center gap-2 flex-shrink-0">
-                            {record.visibility === "shared-with-stella" ? (
+                            {record.visibility === "public" ? (
+                              <span className="flex items-center gap-1 px-2 py-1 rounded-md bg-[#f5e6d8] text-[#c4753f] text-xs">
+                                🌐 公开
+                              </span>
+                            ) : record.visibility === "shared-with-stella" ? (
                               <span className="flex items-center gap-1 px-2 py-1 rounded-md bg-[#e8f0ec] text-[#5a7a6a] text-xs">
                                 <Eye className="w-3 h-3" />
                                 Stella可见

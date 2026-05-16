@@ -10,7 +10,7 @@ export type ToolType =
   | "action-card"
   | "character";
 
-export type Visibility = "private" | "shared-with-stella";
+export type Visibility = "private" | "shared-with-stella" | "public";
 
 export interface ToolRecord {
   id: string;
@@ -21,6 +21,8 @@ export interface ToolRecord {
   content: Record<string, any>;
   visibility: Visibility;
   tags: string[];
+  stellaComment?: string;   // Stella老师的点评
+  stellaCommentAt?: number; // 点评时间
   createdAt: number;
   updatedAt: number;
 }
@@ -41,7 +43,7 @@ const INVITE_CODES_KEY = "stella_invite_codes";
 // ====== 预置邀请码 ======
 // Stella老师可在此追加新邀请码
 const DEFAULT_INVITE_CODES: Record<string, boolean> = {
-  "STELLA-001": false, // false = 未使用
+  "STELLA-001": false,
   "STELLA-002": false,
   "STELLA-003": false,
   "STELLA-004": false,
@@ -51,6 +53,26 @@ const DEFAULT_INVITE_CODES: Record<string, boolean> = {
   "STELLA-008": false,
   "STELLA-009": false,
   "STELLA-010": false,
+  "STELLA-011": false,
+  "STELLA-012": false,
+  "STELLA-013": false,
+  "STELLA-014": false,
+  "STELLA-015": false,
+  "STELLA-016": false,
+  "STELLA-017": false,
+  "STELLA-018": false,
+  "STELLA-019": false,
+  "STELLA-020": false,
+  "STELLA-021": false,
+  "STELLA-022": false,
+  "STELLA-023": false,
+  "STELLA-024": false,
+  "STELLA-025": false,
+  "STELLA-026": false,
+  "STELLA-027": false,
+  "STELLA-028": false,
+  "STELLA-029": false,
+  "STELLA-030": false,
 };
 
 function generateId(): string {
@@ -194,7 +216,7 @@ export function getStellaVisibleRecords(): ToolRecord[] {
 export function getToolStats(userId: string) {
   const records = getToolRecordsByUser(userId);
   const byType: Record<string, number> = {};
-  const byVisibility: Record<string, number> = { private: 0, "shared-with-stella": 0 };
+  const byVisibility: Record<string, number> = { private: 0, "shared-with-stella": 0, public: 0 };
 
   for (const r of records) {
     byType[r.toolType] = (byType[r.toolType] || 0) + 1;

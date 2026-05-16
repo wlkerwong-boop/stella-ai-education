@@ -78,7 +78,7 @@ export default function CharacterPage() {
   });
   const [reflection, setReflection] = useState("");
   const [growthArea, setGrowthArea] = useState("");
-  const [visibility, setVisibility] = useState<"private" | "shared-with-stella">("shared-with-stella");
+  const [visibility, setVisibility] = useState<"private" | "shared-with-stella" | "public">("shared-with-stella");
   const [isSaving, setIsSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [history, setHistory] = useState<{ date: string; scores: Record<string, number> }[]>([]);
@@ -242,20 +242,43 @@ export default function CharacterPage() {
 
         {/* Save */}
         <div className="flex items-center justify-between">
-          <button
-            onClick={() => setVisibility((v) => (v === "private" ? "shared-with-stella" : "private"))}
-            className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs transition-colors ${
-              visibility === "shared-with-stella"
-                ? "bg-[#e8f0ec] text-[#5a7a6a]"
-                : "bg-[#f5f0eb] text-[#9a9590]"
-            }`}
-          >
-            {visibility === "shared-with-stella" ? (
-              <><Eye className="w-3.5 h-3.5" /> Stella可见</>
-            ) : (
-              <><EyeOff className="w-3.5 h-3.5" /> 仅自己</>
-            )}
-          </button>
+                        <div className="flex items-center gap-1 bg-[#f5f0eb] rounded-xl p-1">
+                <button
+                  onClick={() => setVisibility("private")}
+                  className={`px-3 py-1.5 rounded-lg text-xs transition-all ${
+                    visibility === "private"
+                      ? "bg-white shadow-sm text-[#9a9590] font-medium"
+                      : "text-[#9a9590] hover:text-[#2d2a26]"
+                  }`}
+                  title="仅自己可见"
+                >
+                  <EyeOff className="w-3.5 h-3.5 inline mr-1" />
+                  仅自己
+                </button>
+                <button
+                  onClick={() => setVisibility("shared-with-stella")}
+                  className={`px-3 py-1.5 rounded-lg text-xs transition-all ${
+                    visibility === "shared-with-stella"
+                      ? "bg-white shadow-sm text-[#5a7a6a] font-medium"
+                      : "text-[#9a9590] hover:text-[#2d2a26]"
+                  }`}
+                  title="对Stella老师开放"
+                >
+                  <Eye className="w-3.5 h-3.5 inline mr-1" />
+                  Stella
+                </button>
+                <button
+                  onClick={() => setVisibility("public")}
+                  className={`px-3 py-1.5 rounded-lg text-xs transition-all ${
+                    visibility === "public"
+                      ? "bg-white shadow-sm text-[#c4753f] font-medium"
+                      : "text-[#9a9590] hover:text-[#2d2a26]"
+                  }`}
+                  title="对所有人开放"
+                >
+                  🌐 公开
+                </button>
+              </div>
 
           <button
             onClick={handleSave}
