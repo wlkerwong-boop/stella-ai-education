@@ -1,139 +1,107 @@
 // Supabase 客户端（基于 fetch，无需额外依赖）
 // 使用 Supabase REST API 和 Auth API
 
-function getBaseUrl() {
-  if (typeof window === "undefined") {
-    return process.env.NEXT_PUBLIC_SUPABASE_URL || "";
-  }
-  return "";
+function getUrl() {
+  return typeof window === "undefined" ? process.env.NEXT_PUBLIC_SUPABASE_URL || "" : "";
+}
+function getSvcKey() {
+  return typeof window === "undefined" ? process.env.SUPABASE_SERVICE_ROLE_KEY || "" : "";
+}
+function getAnon() {
+  return typeof window === "undefined" ? process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "" : "";
 }
 
-function getServiceKey() {
-  return process.env.SUPABASE_SERVICE_ROLE_KEY || "";
-}
-
-function getAnonKey() {
-  if (typeof window === "undefined") {
-    return process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "";
-  }
-  return "";
-}
-
-// ===== Auth API（服务端用 service_role key） =====
-
-export async function createUser(email: string, password: string) {
-  const res = await fetch(`${getBaseUrl()}/auth/v1/admin/users`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      apikey: getServiceKey(),
-      Authorization: `Bearer ${getServiceKey()}`,
-    },
-    body: JSON.stringify({ email, password, email_confirm: true }),
-  });
-  const data = await res.json();
-  if (!res.ok) throw new Error(data.msg || data.error || "创建用户失败");
-  return data;
-}
-
-export async function deleteUser(userId: string) {
-  await fetch(`${getBaseUrl()}/auth/v1/admin/users/${userId}`, {
-    method: "DELETE",
-    headers: {
-      "Content-Type": "application/json",
-      apikey: getServiceKey(),
-      Authorization: `Bearer ${getServiceKey()}`,
-    },
-  });
-}
-
-export async function signInWithPassword(email: string, password: string) {
-  const res = await fetch(`${getBaseUrl()}/auth/v1/token?grant_type=password`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      apikey: getAnonKey(),
-      Authorization: `Bearer ${getAnonKey()}`,
-    },
-    body: JSON.stringify({ email, password }),
-  });
-  const data = await res.json();
-  if (!res.ok) throw new Error(data.error_description || data.error || "登录失败");
-  return data;
-}
-
-export async function getUser(accessToken: string) {
-  const res = await fetch(`${getBaseUrl()}/auth/v1/user`, {
-    headers: {
-      apikey: getAnonKey(),
-      Authorization: `Bearer ${accessToken}`,
-    },
-  });
-  const data = await res.json();
-  if (!res.ok) throw new Error("获取用户失败");
-  return data;
-}
-
-// ===== Database API（REST） =====
-
-async function dbFetch(
-  path: string,
-  options: { method?: string; body?: any; headers?: Record<string, string>; useService?: boolean } = {}
-) {
-  const key = options.useService ? getServiceKey() : getAnonKey();
-  const res = await fetch(`${getBaseUrl()}/rest/v1/${path}`, {
-    method: options.method || "GET",
+async function req(method: string, path: string, body?: any, useSvc = true) {
+  const key = useSvc ? getSvcKey() : getAnon();
+  const url = `${getUrl()}${path}`;
+  const opts: any = {
+    method,
     headers: {
       "Content-Type": "application/json",
       apikey: key,
       Authorization: `Bearer ${key}`,
-      Accept: "application/json",
-      ...(options.headers || {}),
     },
-    body: options.body ? JSON.stringify(options.body) : undefined,
-  });
-  if (!res.ok) {
-    const text = await res.text();
-    const err = { status: res.status, body: text };
-    throw err;
-  }
-  // For single row requests with non-array returns
-  if (options.headers?.["Accept"] === "application/vnd.pgrst.object+json") {
-    return res.json();
-  }
+  };
+  if (body !== undefined) opts.body = JSON.stringify(body);
+  const res = await fetch(url, opts);
   const text = await res.text();
-  if (!text) return [];
+  if (!res.ok) throw new Error(`${res.status}: ${text.slice(0, 200)}`);
+  return text ? JSON.parse(text) : null;
+}
+
+// ===== Auth API =====
+
+export async function createUser(email: string, password: string) {
+  const data = await req("POST", "/auth/v1/admin/users", { email, password, email_confirm: true });
+  return data;
+}
+
+export async function deleteUser(userId: string) {
+  await req("DELETE", `/auth/v1/admin/users/${userId}`);
+}
+
+export async function signIn(email: string, password: string) {
+  const data = await req("POST", `/auth/v1/token?grant_type=password`, { email, password }, false);
+  return data;
+}
+
+export async function getUser(token: string) {
+  const url = `${getUrl()}/auth/v1/user`;
+  const res = await fetch(url, {
+    headers: { apikey: getAnon(), Authorization: `Bearer ${token}` },
+  });
+  const text = await res.text();
+  if (!res.ok) throw new Error(text);
   return JSON.parse(text);
 }
 
-export async function select(table: string, query: Record<string, string> = {}, useService = false) {
-  const params = new URLSearchParams(query);
-  // Build select query
-  const qs = params.toString();
-  return dbFetch(`${table}${qs ? `?${qs}` : ""}`, { useService });
+// ===== Database API =====
+
+function qs(params: Record<string, string>): string {
+  const parts: string[] = [];
+  for (const [k, v] of Object.entries(params)) {
+    parts.push(`${encodeURIComponent(k)}=${encodeURIComponent(v)}`);
+  }
+  return parts.length ? `?${parts.join("&")}` : "";
 }
 
-export async function selectSingle(table: string, query: Record<string, string> = {}, useService = false) {
-  const params = new URLSearchParams(query);
-  const qs = params.toString();
-  return dbFetch(`${table}${qs ? `?${qs}` : ""}`, {
-    useService,
-    headers: { Accept: "application/vnd.pgrst.object+json" },
+export async function selectOne(table: string, filters: Record<string, string>, useSvc = true) {
+  const path = `/rest/v1/${table}${qs(filters)}`;
+  const key = useSvc ? getSvcKey() : getAnon();
+  const url = `${getUrl()}${path}`;
+  const res = await fetch(url, {
+    headers: {
+      apikey: key,
+      Authorization: `Bearer ${key}`,
+      Accept: "application/vnd.pgrst.object+json",
+    },
   });
+  const text = await res.text();
+  if (!res.ok) return null;
+  return text ? JSON.parse(text) : null;
 }
 
-export async function insert(table: string, data: any, useService = false) {
-  return dbFetch(table, { method: "POST", body: data, useService });
+export async function selectList(table: string, filters: Record<string, string>, useSvc = true) {
+  const path = `/rest/v1/${table}${qs(filters)}`;
+  const key = useSvc ? getSvcKey() : getAnon();
+  const url = `${getUrl()}${path}`;
+  const res = await fetch(url, {
+    headers: { apikey: key, Authorization: `Bearer ${key}` },
+  });
+  const text = await res.text();
+  if (!res.ok) return [];
+  return text ? JSON.parse(text) : [];
 }
 
-export async function update(table: string, data: any, query: Record<string, string> = {}, useService = false) {
-  const params = new URLSearchParams(query);
-  const qs = params.toString();
-  return dbFetch(`${table}${qs ? `?${qs}` : ""}`, { method: "PATCH", body: data, useService });
+export async function insertOne(table: string, data: any, useSvc = true) {
+  const result = await req("POST", `/rest/v1/${table}`, data, useSvc);
+  return Array.isArray(result) ? result[0] : result;
 }
 
-export async function remove(table: string, query: Record<string, string> = {}, useService = false) {
-  const params = new URLSearchParams(query);
-  const qs = params.toString();
-  return dbFetch(`${table}${qs ? `?${qs}` : ""}`, { method: "DELETE", useService });
+export async function updateRows(table: string, data: any, filters: Record<string, string>, useSvc = true) {
+  return req("PATCH", `/rest/v1/${table}${qs(filters)}`, data, useSvc);
+}
+
+export async function deleteRows(table: string, filters: Record<string, string>, useSvc = true) {
+  return req("DELETE", `/rest/v1/${table}${qs(filters)}`, undefined, useSvc);
 }
