@@ -243,6 +243,45 @@ export function getStellaVisibleRecords(): ToolRecord[] {
   return getAllToolRecords().filter((r) => r.visibility === "shared-with-stella");
 }
 
+export function getToolStats(userId: string) {
+  const records = getToolRecordsByUser(userId);
+  const byType: Record<string, number> = {};
+  const byVisibility: Record<string, number> = { private: 0, "shared-with-stella": 0, public: 0 };
+  for (const r of records) {
+    byType[r.toolType] = (byType[r.toolType] || 0) + 1;
+    byVisibility[r.visibility] = (byVisibility[r.visibility] || 0) + 1;
+  }
+  return {
+    totalRecords: records.length,
+    byType,
+    byVisibility,
+    firstRecordDate: records.length > 0 ? records[records.length - 1].createdAt : null,
+    latestRecordDate: records.length > 0 ? records[0].createdAt : null,
+  };
+}
+
+export function getEmotionHistory(userId: string, days: number = 30): { date: string; score: number; emotion: string }[] {
+  return getToolRecordsByUser(userId)
+    .filter((r) => r.toolType === "emotion")
+    .slice(0, days)
+    .map((r) => ({
+      date: r.content.date || new Date(r.createdAt).toISOString().slice(0, 10),
+      score: r.content.score || 5,
+      emotion: r.content.emotion || "",
+    }))
+    .reverse();
+}
+
+export function getCharacterHistory(userId: string): { date: string; scores: Record<string, number> }[] {
+  return getToolRecordsByUser(userId)
+    .filter((r) => r.toolType === "character")
+    .map((r) => ({
+      date: r.content.date || new Date(r.createdAt).toISOString().slice(0, 10),
+      scores: r.content.scores || {},
+    }))
+    .reverse();
+}
+
 export async function apiVerifyInviteCode(code: string): Promise<{ valid: boolean; message: string }> {
   try {
     const res = await fetch("/api/auth/verify", {
