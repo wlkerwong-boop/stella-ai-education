@@ -1,107 +1,87 @@
-// Supabase 客户端（基于 fetch，无需额外依赖）
-// 使用 Supabase REST API 和 Auth API
+// Supabase REST API 调用封装
+// 所有函数直接执行 fetch，不经过中间层
 
-function getUrl() {
-  return typeof window === "undefined" ? process.env.NEXT_PUBLIC_SUPABASE_URL || "" : "";
-}
-function getSvcKey() {
-  return typeof window === "undefined" ? process.env.SUPABASE_SERVICE_ROLE_KEY || "" : "";
-}
-function getAnon() {
-  return typeof window === "undefined" ? process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "" : "";
-}
+const SB_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
+const SB_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
+const SB_ANON = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "";
 
-async function req(method: string, path: string, body?: any, useSvc = true) {
-  const key = useSvc ? getSvcKey() : getAnon();
-  const url = `${getUrl()}${path}`;
-  const opts: any = {
-    method,
-    headers: {
-      "Content-Type": "application/json",
-      apikey: key,
-      Authorization: `Bearer ${key}`,
-    },
+async function supFetch(path: string, opts: any = {}) {
+  const key = opts.anon ? SB_ANON : SB_KEY;
+  const url = `${SB_URL}${path}`;
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+    apikey: key,
+    Authorization: `Bearer ${key}`,
+    ...(opts.headers || {}),
   };
-  if (body !== undefined) opts.body = JSON.stringify(body);
-  const res = await fetch(url, opts);
-  const text = await res.text();
-  if (!res.ok) throw new Error(`${res.status}: ${text.slice(0, 200)}`);
-  return text ? JSON.parse(text) : null;
-}
-
-// ===== Auth API =====
-
-export async function createUser(email: string, password: string) {
-  const data = await req("POST", "/auth/v1/admin/users", { email, password, email_confirm: true });
-  return data;
-}
-
-export async function deleteUser(userId: string) {
-  await req("DELETE", `/auth/v1/admin/users/${userId}`);
-}
-
-export async function signIn(email: string, password: string) {
-  const data = await req("POST", `/auth/v1/token?grant_type=password`, { email, password }, false);
-  return data;
-}
-
-export async function getUser(token: string) {
-  const url = `${getUrl()}/auth/v1/user`;
   const res = await fetch(url, {
-    headers: { apikey: getAnon(), Authorization: `Bearer ${token}` },
+    method: opts.method || "GET",
+    headers,
+    body: opts.body ? JSON.stringify(opts.body) : undefined,
   });
-  const text = await res.text();
-  if (!res.ok) throw new Error(text);
-  return JSON.parse(text);
-}
-
-// ===== Database API =====
-
-function qs(params: Record<string, string>): string {
-  const parts: string[] = [];
-  for (const [k, v] of Object.entries(params)) {
-    parts.push(`${encodeURIComponent(k)}=${encodeURIComponent(v)}`);
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`${res.status}: ${text.slice(0, 200)}`);
   }
-  return parts.length ? `?${parts.join("&")}` : "";
-}
-
-export async function selectOne(table: string, filters: Record<string, string>, useSvc = true) {
-  const path = `/rest/v1/${table}${qs(filters)}`;
-  const key = useSvc ? getSvcKey() : getAnon();
-  const url = `${getUrl()}${path}`;
-  const res = await fetch(url, {
-    headers: {
-      apikey: key,
-      Authorization: `Bearer ${key}`,
-      Accept: "application/vnd.pgrst.object+json",
-    },
-  });
   const text = await res.text();
-  if (!res.ok) return null;
   return text ? JSON.parse(text) : null;
 }
 
-export async function selectList(table: string, filters: Record<string, string>, useSvc = true) {
-  const path = `/rest/v1/${table}${qs(filters)}`;
-  const key = useSvc ? getSvcKey() : getAnon();
-  const url = `${getUrl()}${path}`;
-  const res = await fetch(url, {
-    headers: { apikey: key, Authorization: `Bearer ${key}` },
+// 查单条记录（返回对象）
+export async function dbGet(table: string, filter: string, select = "*") {
+  return supFetch(`/rest/v1/${table}?${filter}&select=${encodeURIComponent(select)}`, {
+    headers: { Accept: "application/vnd.pgrst.object+json" },
   });
-  const text = await res.text();
-  if (!res.ok) return [];
-  return text ? JSON.parse(text) : [];
 }
 
-export async function insertOne(table: string, data: any, useSvc = true) {
-  const result = await req("POST", `/rest/v1/${table}`, data, useSvc);
-  return Array.isArray(result) ? result[0] : result;
+// 查多条记录（返回数组）
+export async function dbList(table: string, filter = "", select = "*") {
+  return supFetch(`/rest/v1/${table}?${filter}&select=${encodeURIComponent(select)}&order=created_at.desc`);
 }
 
-export async function updateRows(table: string, data: any, filters: Record<string, string>, useSvc = true) {
-  return req("PATCH", `/rest/v1/${table}${qs(filters)}`, data, useSvc);
+// 插入
+export async function dbInsert(table: string, data: any) {
+  const r = await supFetch(`/rest/v1/${table}`, { method: "POST", body: data });
+  return Array.isArray(r) ? r[0] : r;
 }
 
-export async function deleteRows(table: string, filters: Record<string, string>, useSvc = true) {
-  return req("DELETE", `/rest/v1/${table}${qs(filters)}`, undefined, useSvc);
+// 更新
+export async function dbUpdate(table: string, data: any, filter: string) {
+  return supFetch(`/rest/v1/${table}?${filter}`, { method: "PATCH", body: data });
+}
+
+// 删除
+export async function dbDelete(table: string, filter: string) {
+  return supFetch(`/rest/v1/${table}?${filter}`, { method: "DELETE" });
+}
+
+// Auth: 创建用户
+export async function authCreateUser(email: string, password: string) {
+  return supFetch("/auth/v1/admin/users", {
+    method: "POST",
+    body: { email, password, email_confirm: true },
+  });
+}
+
+// Auth: 删除用户
+export async function authDeleteUser(uid: string) {
+  return supFetch(`/auth/v1/admin/users/${uid}`, { method: "DELETE" });
+}
+
+// Auth: 密码登录
+export async function authLogin(email: string, password: string) {
+  return supFetch(`/auth/v1/token?grant_type=password`, {
+    method: "POST",
+    body: { email, password },
+    anon: true,
+  });
+}
+
+// Auth: 获取用户
+export async function authGetUser(token: string) {
+  const res = await fetch(`${SB_URL}/auth/v1/user`, {
+    headers: { apikey: SB_ANON, Authorization: `Bearer ${token}` },
+  });
+  if (!res.ok) throw new Error("获取用户失败");
+  return res.json();
 }
