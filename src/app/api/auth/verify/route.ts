@@ -1,42 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 
-// 预置邀请码（服务端亦需维护一份）
-const VALID_CODES: Record<string, boolean> = {
-  "STELLA-001": false,
-  "STELLA-002": false,
-  "STELLA-003": false,
-  "STELLA-004": false,
-  "STELLA-005": false,
-  "STELLA-006": false,
-  "STELLA-007": false,
-  "STELLA-008": false,
-  "STELLA-009": false,
-  "STELLA-010": false,
-  "STELLA-011": false,
-  "STELLA-012": false,
-  "STELLA-013": false,
-  "STELLA-014": false,
-  "STELLA-015": false,
-  "STELLA-016": false,
-  "STELLA-017": false,
-  "STELLA-018": false,
-  "STELLA-019": false,
-  "STELLA-020": false,
-  "STELLA-021": false,
-  "STELLA-022": false,
-  "STELLA-023": false,
-  "STELLA-024": false,
-  "STELLA-025": false,
-  "STELLA-026": false,
-  "STELLA-027": false,
-  "STELLA-028": false,
-  "STELLA-029": false,
-  "STELLA-030": false,
-};
-
-// 已使用的邀请码（服务端记录）
-// 注意：生产环境应使用数据库存储
-const usedCodes = new Set<string>();
+// 邀请码列表（服务端白名单校验）
+// 注意：验证码是否"已使用"由客户端 localStorage 管理，
+// 服务端仅校验验证码是否在白名单中 —— 这样才能跨设备多次使用同一验证码。
+const VALID_CODES = new Set([
+  "STELLA-001", "STELLA-002", "STELLA-003", "STELLA-004", "STELLA-005",
+  "STELLA-006", "STELLA-007", "STELLA-008", "STELLA-009", "STELLA-010",
+  "STELLA-011", "STELLA-012", "STELLA-013", "STELLA-014", "STELLA-015",
+  "STELLA-016", "STELLA-017", "STELLA-018", "STELLA-019", "STELLA-020",
+  "STELLA-021", "STELLA-022", "STELLA-023", "STELLA-024", "STELLA-025",
+  "STELLA-026", "STELLA-027", "STELLA-028", "STELLA-029", "STELLA-030",
+]);
 
 export async function POST(req: NextRequest) {
   try {
@@ -47,17 +21,12 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ valid: false, message: "请输入邀请码" });
     }
 
-    if (VALID_CODES[trimmed] === undefined) {
+    if (!VALID_CODES.has(trimmed)) {
       return NextResponse.json({ valid: false, message: "邀请码不存在，请确认后重试" });
     }
 
-    if (usedCodes.has(trimmed)) {
-      return NextResponse.json({ valid: false, message: "该邀请码已被使用" });
-    }
-
-    // 标记已使用（客户端注册成功后会同步标记）
-    usedCodes.add(trimmed);
-
+    // 服务端不做"已使用"标记，仅校验白名单。
+    // 客户端 localStorage 负责记录哪些验证码已被当前设备使用。
     return NextResponse.json({ valid: true, message: "邀请码验证通过" });
   } catch (error) {
     console.error("Verify code error:", error);
