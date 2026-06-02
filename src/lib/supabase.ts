@@ -1,9 +1,9 @@
-// Supabase REST API 调用封装
-// 所有函数直接执行 fetch，不经过中间层
+// Supabase REST API 封装（临时硬编码）
+// TODO: 环境变量修好后改为 process.env
 
-const SB_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
-const SB_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
-const SB_ANON = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "";
+const SB_URL = "https://tnmbesyjsftephqmwsmw.supabase.co";
+const SB_KEY = "sb_secret_O56pTqkPlgre09xc0JOx2A_oIUfjpX3";
+const SB_ANON = "sb_publishable_yBYMK2lVhVeoR4XNHvrzfQ_hVXvUznS";
 
 async function supFetch(path: string, opts: any = {}) {
   const key = opts.anon ? SB_ANON : SB_KEY;
@@ -27,14 +27,14 @@ async function supFetch(path: string, opts: any = {}) {
   return text ? JSON.parse(text) : null;
 }
 
-// 查单条记录（返回对象）
+// 查单条
 export async function dbGet(table: string, filter: string, select = "*") {
   return supFetch(`/rest/v1/${table}?${filter}&select=${encodeURIComponent(select)}`, {
     headers: { Accept: "application/vnd.pgrst.object+json" },
   });
 }
 
-// 查多条记录（返回数组）
+// 查多条
 export async function dbList(table: string, filter = "", select = "*") {
   return supFetch(`/rest/v1/${table}?${filter}&select=${encodeURIComponent(select)}&order=created_at.desc`);
 }
@@ -57,10 +57,7 @@ export async function dbDelete(table: string, filter: string) {
 
 // Auth: 创建用户
 export async function authCreateUser(email: string, password: string) {
-  return supFetch("/auth/v1/admin/users", {
-    method: "POST",
-    body: { email, password, email_confirm: true },
-  });
+  return supFetch("/auth/v1/admin/users", { method: "POST", body: { email, password, email_confirm: true } });
 }
 
 // Auth: 删除用户
@@ -70,11 +67,7 @@ export async function authDeleteUser(uid: string) {
 
 // Auth: 密码登录
 export async function authLogin(email: string, password: string) {
-  return supFetch(`/auth/v1/token?grant_type=password`, {
-    method: "POST",
-    body: { email, password },
-    anon: true,
-  });
+  return supFetch(`/auth/v1/token?grant_type=password`, { method: "POST", body: { email, password }, anon: true });
 }
 
 // Auth: 获取用户

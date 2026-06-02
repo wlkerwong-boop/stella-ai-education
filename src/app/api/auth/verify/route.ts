@@ -12,8 +12,8 @@ export async function POST(req: NextRequest) {
       if (!d) return NextResponse.json({ valid: false, message: "邀请码不存在" });
       if (d.is_used) return NextResponse.json({ valid: false, message: "该邀请码已被使用" });
       return NextResponse.json({ valid: true, message: "验证通过" });
-    } catch (e: any) {
-      return NextResponse.json({ valid: false, message: `DB错误:${e.message?.slice(0,50) || "未知"}` });
+    } catch {
+      return NextResponse.json({ valid: false, message: "邀请码不存在" });
     }
   } catch {
     return NextResponse.json({ valid: false, message: "验证服务异常" });
