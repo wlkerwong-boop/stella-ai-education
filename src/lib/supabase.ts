@@ -1,86 +1,65 @@
-// Supabase REST API 调用封装
-// 所有函数直接执行 fetch，不经过中间层
+// Supabase REST API 封装
+// 优先用环境变量
 
-const SB_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
-const SB_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
-const SB_ANON = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "";
+function getUrl() { return process.env.NEXT_PUBLIC_SUPABASE_URL || ""; }
+function getKey() { return process.env.SUPABASE_SERVICE_ROLE_KEY || ""; }
+function getAnon() { return process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ""; }
 
 async function supFetch(path: string, opts: any = {}) {
-  const key = opts.anon ? SB_ANON : SB_KEY;
-  const url = `${SB_URL}${path}`;
-  const headers: Record<string, string> = {
-    "Content-Type": "application/json",
-    apikey: key,
-    Authorization: `Bearer ${key}`,
-    ...(opts.headers || {}),
-  };
-  const res = await fetch(url, {
+  const key = opts.anon ? getAnon() : getKey();
+  const baseUrl = getUrl();
+  if (!baseUrl || !key) throw new Error("Supabase未配置");
+  const res = await fetch(`${baseUrl}${path}`, {
     method: opts.method || "GET",
-    headers,
+    headers: {
+      "Content-Type": "application/json", apikey: key, Authorization: `Bearer ${key}`,
+      ...(opts.headers || {}),
+    },
     body: opts.body ? JSON.stringify(opts.body) : undefined,
   });
-  if (!res.ok) {
-    const text = await res.text();
-    throw new Error(`${res.status}: ${text.slice(0, 200)}`);
-  }
-  const text = await res.text();
-  return text ? JSON.parse(text) : null;
+  if (!res.ok) { const t = await res.text(); throw new Error(`${res.status}: ${t.slice(0,200)}`); }
+  const t = await res.text();
+  return t ? JSON.parse(t) : null;
 }
 
-// 查单条记录（返回对象）
+// 查单条 - 用数组+取第0个，避免Accept object的问题
 export async function dbGet(table: string, filter: string, select = "*") {
-  return supFetch(`/rest/v1/${table}?${filter}&select=${encodeURIComponent(select)}`, {
-    headers: { Accept: "application/vnd.pgrst.object+json" },
-  });
+  const arr = await supFetch(`/rest/v1/${table}?${filter}&select=${encodeURIComponent(select)}`);
+  return Array.isArray(arr) && arr.length > 0 ? arr[0] : null;
 }
 
-// 查多条记录（返回数组）
-export async function dbList(table: string, filter = "", select = "*") {
-  return supFetch(`/rest/v1/${table}?${filter}&select=${encodeURIComponent(select)}&order=created_at.desc`);
+export async function dbList(table: string, filter = "") {
+  return supFetch(`/rest/v1/${table}?${filter}&select=*&order=created_at.desc`);
 }
 
-// 插入
 export async function dbInsert(table: string, data: any) {
   const r = await supFetch(`/rest/v1/${table}`, { method: "POST", body: data });
   return Array.isArray(r) ? r[0] : r;
 }
 
-// 更新
 export async function dbUpdate(table: string, data: any, filter: string) {
   return supFetch(`/rest/v1/${table}?${filter}`, { method: "PATCH", body: data });
 }
 
-// 删除
 export async function dbDelete(table: string, filter: string) {
   return supFetch(`/rest/v1/${table}?${filter}`, { method: "DELETE" });
 }
 
-// Auth: 创建用户
 export async function authCreateUser(email: string, password: string) {
-  return supFetch("/auth/v1/admin/users", {
-    method: "POST",
-    body: { email, password, email_confirm: true },
-  });
+  return supFetch("/auth/v1/admin/users", { method: "POST", body: { email, password, email_confirm: true } });
 }
 
-// Auth: 删除用户
 export async function authDeleteUser(uid: string) {
   return supFetch(`/auth/v1/admin/users/${uid}`, { method: "DELETE" });
 }
 
-// Auth: 密码登录
 export async function authLogin(email: string, password: string) {
-  return supFetch(`/auth/v1/token?grant_type=password`, {
-    method: "POST",
-    body: { email, password },
-    anon: true,
-  });
+  return supFetch(`/auth/v1/token?grant_type=password`, { method: "POST", body: { email, password }, anon: true });
 }
 
-// Auth: 获取用户
 export async function authGetUser(token: string) {
-  const res = await fetch(`${SB_URL}/auth/v1/user`, {
-    headers: { apikey: SB_ANON, Authorization: `Bearer ${token}` },
+  const res = await fetch(`${getUrl()}/auth/v1/user`, {
+    headers: { apikey: getAnon(), Authorization: `Bearer ${token}` },
   });
   if (!res.ok) throw new Error("获取用户失败");
   return res.json();
