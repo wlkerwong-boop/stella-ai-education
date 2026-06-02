@@ -1,13 +1,25 @@
-// Supabase REST API 封装（临时硬编码）
-// TODO: 环境变量修好后改为 process.env
+// Supabase REST API 封装
+// 优先用环境变量，本地开发用 .env.local
 
-const SB_URL = "https://tnmbesyjsftephqmwsmw.supabase.co";
-const SB_KEY = "sb_secret_O56pTqkPlgre09xc0JOx2A_oIUfjpX3";
-const SB_ANON = "sb_publishable_yBYMK2lVhVeoR4XNHvrzfQ_hVXvUznS";
+function getUrl() {
+  return process.env.NEXT_PUBLIC_SUPABASE_URL || "";
+}
+
+function getKey() {
+  return process.env.SUPABASE_SERVICE_ROLE_KEY || "";
+}
+
+function getAnon() {
+  return process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "";
+}
 
 async function supFetch(path: string, opts: any = {}) {
-  const key = opts.anon ? SB_ANON : SB_KEY;
-  const url = `${SB_URL}${path}`;
+  const key = opts.anon ? getAnon() : getKey();
+  const baseUrl = getUrl();
+  if (!baseUrl || !key) {
+    throw new Error(`Supabase未配置: URL=${!!baseUrl} KEY=${!!key}`);
+  }
+  const url = `${baseUrl}${path}`;
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
     apikey: key,
@@ -27,53 +39,46 @@ async function supFetch(path: string, opts: any = {}) {
   return text ? JSON.parse(text) : null;
 }
 
-// 查单条
 export async function dbGet(table: string, filter: string, select = "*") {
   return supFetch(`/rest/v1/${table}?${filter}&select=${encodeURIComponent(select)}`, {
     headers: { Accept: "application/vnd.pgrst.object+json" },
   });
 }
 
-// 查多条
-export async function dbList(table: string, filter = "", select = "*") {
-  return supFetch(`/rest/v1/${table}?${filter}&select=${encodeURIComponent(select)}&order=created_at.desc`);
+export async function dbList(table: string, filter = "") {
+  return supFetch(`/rest/v1/${table}?${filter}&select=*&order=created_at.desc`);
 }
 
-// 插入
 export async function dbInsert(table: string, data: any) {
   const r = await supFetch(`/rest/v1/${table}`, { method: "POST", body: data });
   return Array.isArray(r) ? r[0] : r;
 }
 
-// 更新
 export async function dbUpdate(table: string, data: any, filter: string) {
   return supFetch(`/rest/v1/${table}?${filter}`, { method: "PATCH", body: data });
 }
 
-// 删除
 export async function dbDelete(table: string, filter: string) {
   return supFetch(`/rest/v1/${table}?${filter}`, { method: "DELETE" });
 }
 
-// Auth: 创建用户
 export async function authCreateUser(email: string, password: string) {
   return supFetch("/auth/v1/admin/users", { method: "POST", body: { email, password, email_confirm: true } });
 }
 
-// Auth: 删除用户
 export async function authDeleteUser(uid: string) {
   return supFetch(`/auth/v1/admin/users/${uid}`, { method: "DELETE" });
 }
 
-// Auth: 密码登录
 export async function authLogin(email: string, password: string) {
   return supFetch(`/auth/v1/token?grant_type=password`, { method: "POST", body: { email, password }, anon: true });
 }
 
-// Auth: 获取用户
 export async function authGetUser(token: string) {
-  const res = await fetch(`${SB_URL}/auth/v1/user`, {
-    headers: { apikey: SB_ANON, Authorization: `Bearer ${token}` },
+  const baseUrl = getUrl();
+  const anon = getAnon();
+  const res = await fetch(`${baseUrl}/auth/v1/user`, {
+    headers: { apikey: anon, Authorization: `Bearer ${token}` },
   });
   if (!res.ok) throw new Error("获取用户失败");
   return res.json();
