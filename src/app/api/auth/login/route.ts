@@ -1,9 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
-
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
-const supabase = createClient(supabaseUrl, serviceKey);
+import { signInWithPassword, selectSingle } from "@/lib/supabase";
 
 export async function POST(req: NextRequest) {
   try {
@@ -13,29 +9,27 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "请输入邮箱和密码" }, { status: 400 });
     }
 
-    // 用Supabase Auth登录
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-
-    if (error) {
+    // 用 Supabase Auth 登录
+    let data: any;
+    try {
+      data = await signInWithPassword(email, password);
+    } catch {
       return NextResponse.json({ error: "邮箱或密码错误" }, { status: 401 });
     }
 
     // 获取用户档案
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("id, nickname, email, invite_code")
-      .eq("auth_id", data.user.id)
-      .single();
+    let profile: any = null;
+    try {
+      const profiles = await selectSingle("profiles", { auth_id: `eq.${data.user.id}`, select: "id,nickname,email,invite_code" }, true);
+      profile = profiles;
+    } catch {}
 
     return NextResponse.json({
       success: true,
       session: {
-        access_token: data.session.access_token,
-        refresh_token: data.session.refresh_token,
-        expires_at: data.session.expires_at,
+        access_token: data.access_token,
+        refresh_token: data.refresh_token,
+        expires_at: data.expires_at,
       },
       user: {
         id: profile?.id,

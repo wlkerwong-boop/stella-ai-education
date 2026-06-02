@@ -1,9 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
-
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
-const supabase = createClient(supabaseUrl, serviceKey);
+import { selectSingle } from "@/lib/supabase";
 
 export async function POST(req: NextRequest) {
   try {
@@ -15,21 +11,18 @@ export async function POST(req: NextRequest) {
     }
 
     // 查数据库中的邀请码
-    const { data, error } = await supabase
-      .from("invite_codes")
-      .select("code, is_used")
-      .eq("code", trimmed)
-      .single();
-
-    if (error || !data) {
+    try {
+      const data = await selectSingle("invite_codes", { code: `eq.${trimmed}`, select: "code,is_used" }, true);
+      if (!data) {
+        return NextResponse.json({ valid: false, message: "邀请码不存在，请确认后重试" });
+      }
+      if (data.is_used) {
+        return NextResponse.json({ valid: false, message: "该邀请码已被使用" });
+      }
+      return NextResponse.json({ valid: true, message: "邀请码验证通过" });
+    } catch {
       return NextResponse.json({ valid: false, message: "邀请码不存在，请确认后重试" });
     }
-
-    if (data.is_used) {
-      return NextResponse.json({ valid: false, message: "该邀请码已被使用" });
-    }
-
-    return NextResponse.json({ valid: true, message: "邀请码验证通过" });
   } catch (error) {
     console.error("Verify code error:", error);
     return NextResponse.json({ valid: false, message: "验证服务异常" });

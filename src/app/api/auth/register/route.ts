@@ -1,9 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
-
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
-const supabase = createClient(supabaseUrl, serviceKey);
+import { createUser, deleteUser, selectSingle, insert, update as dbUpdate } from "@/lib/supabase";
 
 const VALID_CODES = new Set([
   "STELLA-001", "STELLA-002", "STELLA-003", "STELLA-004", "STELLA-005",
@@ -28,55 +24,45 @@ export async function POST(req: NextRequest) {
     }
 
     // 检查邀请码是否已被使用
-    const { data: existingCode } = await supabase
-      .from("invite_codes")
-      .select("is_used")
-      .eq("code", code)
-      .single();
-
-    if (existingCode?.is_used) {
-      return NextResponse.json({ error: "该邀请码已被使用" }, { status: 400 });
+    try {
+      const existingCode = await selectSingle("invite_codes", { code: `eq.${code}`, select: "is_used" }, true);
+      if (existingCode?.is_used) {
+        return NextResponse.json({ error: "该邀请码已被使用" }, { status: 400 });
+      }
+    } catch {
+      return NextResponse.json({ error: "验证邀请码失败" }, { status: 500 });
     }
 
     // 创建 Supabase Auth 用户
-    const { data: authData, error: authError } = await supabase.auth.admin.createUser({
-      email,
-      password,
-      email_confirm: true,
-    });
-
-    if (authError) {
-      return NextResponse.json({ error: authError.message }, { status: 400 });
+    let authUser: any;
+    try {
+      authUser = await createUser(email, password);
+    } catch (e: any) {
+      return NextResponse.json({ error: e.message || "创建用户失败" }, { status: 400 });
     }
 
     // 创建用户档案
-    const { data: profile, error: profileError } = await supabase
-      .from("profiles")
-      .insert({
-        auth_id: authData.user.id,
+    try {
+      const profiles = await insert("profiles", {
+        auth_id: authUser.id,
         email,
         nickname: nickname.trim(),
         invite_code: code,
-      })
-      .select()
-      .single();
+      }, true);
+      const profile = Array.isArray(profiles) ? profiles[0] : profiles;
 
-    if (profileError) {
+      // 标记邀请码已使用
+      await dbUpdate("invite_codes", { is_used: true, used_by: profile.id, used_at: new Date().toISOString() }, { code: `eq.${code}` }, true);
+
+      return NextResponse.json({
+        success: true,
+        user: { id: profile.id, email, nickname: profile.nickname },
+      });
+    } catch {
       // 回滚：删除已创建的 Auth 用户
-      await supabase.auth.admin.deleteUser(authData.user.id);
+      await deleteUser(authUser.id);
       return NextResponse.json({ error: "创建用户档案失败" }, { status: 500 });
     }
-
-    // 标记邀请码已使用
-    await supabase
-      .from("invite_codes")
-      .update({ is_used: true, used_by: profile.id, used_at: new Date().toISOString() })
-      .eq("code", code);
-
-    return NextResponse.json({
-      success: true,
-      user: { id: profile.id, email, nickname: profile.nickname },
-    });
   } catch (error) {
     console.error("Register error:", error);
     return NextResponse.json({ error: "注册失败，请稍后重试" }, { status: 500 });
