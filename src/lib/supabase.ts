@@ -1,15 +1,13 @@
 // Supabase REST API 封装
-// 优先用环境变量
+// 使用硬编码值（后续改回环境变量）
 
-function getUrl() { return process.env.NEXT_PUBLIC_SUPABASE_URL || ""; }
-function getKey() { return process.env.SUPABASE_SERVICE_ROLE_KEY || ""; }
-function getAnon() { return process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ""; }
+const SB_URL = "https://tnmbesyjsftephqmwsmw.supabase.co";
+const SB_KEY = "sb_secret_O56pTqkPlgre09xc0JOx2A_oIUfjpX3";
+const SB_ANON = "sb_publishable_yBYMK2lVhVeoR4XNHvrzfQ_hVXvUznS";
 
 async function supFetch(path: string, opts: any = {}) {
-  const key = opts.anon ? getAnon() : getKey();
-  const baseUrl = getUrl();
-  if (!baseUrl || !key) throw new Error("Supabase未配置");
-  const res = await fetch(`${baseUrl}${path}`, {
+  const key = opts.anon ? SB_ANON : SB_KEY;
+  const res = await fetch(`${SB_URL}${path}`, {
     method: opts.method || "GET",
     headers: {
       "Content-Type": "application/json", apikey: key, Authorization: `Bearer ${key}`,
@@ -22,7 +20,6 @@ async function supFetch(path: string, opts: any = {}) {
   return t ? JSON.parse(t) : null;
 }
 
-// 查单条 - 用数组+取第0个，避免Accept object的问题
 export async function dbGet(table: string, filter: string, select = "*") {
   const arr = await supFetch(`/rest/v1/${table}?${filter}&select=${encodeURIComponent(select)}`);
   return Array.isArray(arr) && arr.length > 0 ? arr[0] : null;
@@ -58,8 +55,8 @@ export async function authLogin(email: string, password: string) {
 }
 
 export async function authGetUser(token: string) {
-  const res = await fetch(`${getUrl()}/auth/v1/user`, {
-    headers: { apikey: getAnon(), Authorization: `Bearer ${token}` },
+  const res = await fetch(`${SB_URL}/auth/v1/user`, {
+    headers: { apikey: SB_ANON, Authorization: `Bearer ${token}` },
   });
   if (!res.ok) throw new Error("获取用户失败");
   return res.json();
