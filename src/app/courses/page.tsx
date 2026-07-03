@@ -14,6 +14,8 @@ import {
   Star,
 } from "lucide-react";
 
+import Navbar from "@/components/Navbar";
+
 const modules = [
   {
     id: 1,
@@ -118,12 +120,13 @@ const modules = [
     duration: "4周",
     lessons: 4,
     topics: [
-      "批判性思维的核心要素",
-      "如何引导孩子质疑与求证",
-      "多角度思考与换位思考",
-      "从被动接受到主动探究",
+      "批判性思维的本质与CER论证模型",
+      "如何用CER工具引导孩子质疑与求证",
+      "多角度思考与换位思考练习",
+      "建立家庭思辨文化",
     ],
-    status: "即将开课",
+    status: "进行中",
+    link: "/courses/module7",
     color: "#5a6a8a",
     bgColor: "#e8ecf0",
   },
@@ -235,25 +238,7 @@ const features = [
 export default function CoursesPage() {
   return (
     <div className="min-h-screen bg-[#faf8f5]">
-      {/* Header */}
-      <header className="sticky top-0 z-50 bg-[#faf8f5]/90 backdrop-blur-md border-b border-[#e8e4df]">
-        <div className="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between">
-          <Link
-            href="/"
-            className="flex items-center gap-2 text-[#9a9590] hover:text-[#2d2a26] transition-colors"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            <span className="text-sm">返回首页</span>
-          </Link>
-          <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-lg bg-[#c4753f] flex items-center justify-center">
-              <Sparkles className="w-4 h-4 text-white" />
-            </div>
-            <span className="font-medium text-[#2d2a26]">课程体系</span>
-          </div>
-          <div className="w-16" />
-        </div>
-      </header>
+      <Navbar />
 
       {/* Hero */}
       <section className="py-16 px-4">

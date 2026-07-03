@@ -12,48 +12,12 @@ import {
   Heart,
   Target,
 } from "lucide-react";
+import Navbar from "@/components/Navbar";
 
 export default function Home() {
   return (
     <div className="min-h-screen bg-[#faf8f5]">
-      {/* Navigation */}
-      <nav className="sticky top-0 z-50 bg-[#faf8f5]/80 backdrop-blur-md border-b border-[#e8e4df]">
-        <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-[#c4753f] flex items-center justify-center">
-              <Sparkles className="w-5 h-5 text-white" />
-            </div>
-            <span className="font-semibold text-[#2d2a26]">Stella教育智囊</span>
-          </Link>
-          <div className="flex items-center gap-6">
-            <Link
-              href="/courses"
-              className="text-sm text-[#5a7a6a] hover:text-[#2d2a26] transition-colors"
-            >
-              课程学习
-            </Link>
-            <Link
-              href="/tools"
-              className="text-sm text-[#5a7a6a] hover:text-[#2d2a26] transition-colors"
-            >
-              学员工具台
-            </Link>
-            <Link
-              href="/growth"
-              className="text-sm text-[#5a7a6a] hover:text-[#2d2a26] transition-colors"
-            >
-              成长图谱
-            </Link>
-            <Link
-              href="/chat"
-              className="flex items-center gap-2 px-4 py-2 rounded-full bg-[#c4753f] text-white text-sm hover:bg-[#a86235] transition-colors"
-            >
-              <MessageCircle className="w-4 h-4" />
-              开始咨询
-            </Link>
-          </div>
-        </div>
-      </nav>
+      <Navbar />
 
       {/* Hero Section */}
       <section className="relative pt-20 pb-32 px-4 overflow-hidden">
@@ -273,6 +237,62 @@ export default function Home() {
                 </div>
               ))}
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 转化入口：邀请码领取 */}
+      <section className="py-16 px-4 bg-gradient-to-b from-white to-[#faf8f5]">
+        <div className="max-w-4xl mx-auto">
+          <div className="grid md:grid-cols-2 gap-8">
+            {/* 免费试听 */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="p-8 rounded-2xl bg-white border border-[#e8e4df] shadow-sm hover:shadow-md transition-shadow"
+            >
+              <div className="w-12 h-12 rounded-xl bg-[#e8f0ec] flex items-center justify-center mb-4">
+                <MessageCircle className="w-6 h-6 text-[#5a7a6a]" />
+              </div>
+              <h3 className="text-lg font-bold text-[#2d2a26] mb-2">免费体验AI咨询</h3>
+              <p className="text-sm text-[#9a9590] mb-6 leading-relaxed">
+                无需注册，立即向Stella老师提问。<br />
+                体验系统思维如何帮你看见教育问题的整体。
+              </p>
+              <Link
+                href="/chat"
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-[#f5e6d8] text-[#c4753f] text-sm font-medium hover:bg-[#e8d5c4] transition-colors"
+              >
+                免费咨询
+                <ArrowRight className="w-4 h-4" />
+              </Link>
+            </motion.div>
+
+            {/* 领取邀请码 */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.1 }}
+              className="p-8 rounded-2xl bg-[#f5e6d8] border border-[#e8d5c4] shadow-sm hover:shadow-md transition-shadow"
+            >
+              <div className="w-12 h-12 rounded-xl bg-[#c4753f] flex items-center justify-center mb-4">
+                <Sparkles className="w-6 h-6 text-white" />
+              </div>
+              <h3 className="text-lg font-bold text-[#2d2a26] mb-2">领取免费邀请码</h3>
+              <p className="text-sm text-[#7a6a5a] mb-6 leading-relaxed">
+                注册成为正式学员，解锁学员工具台、<br />
+                成长图谱追踪和社群交流权限。
+              </p>
+              <Link
+                href="/auth/login"
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-[#c4753f] text-white text-sm font-medium hover:bg-[#a86235] transition-colors"
+              >
+                领取邀请码
+                <ArrowRight className="w-4 h-4" />
+              </Link>
+            </motion.div>
           </div>
         </div>
       </section>

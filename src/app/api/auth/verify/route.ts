@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { dbGet } from "@/lib/supabase";
+
+const CODES = new Set(Array.from({ length: 30 }, (_, i) => `STELLA-${String(i + 1).padStart(3, "0")}`));
+// 记录已使用的邀请码（内存中，重启后重置）
+const usedCodes = new Set<string>();
 
 export async function POST(req: NextRequest) {
   try {
@@ -7,14 +10,10 @@ export async function POST(req: NextRequest) {
     const c = (code || "").trim().toUpperCase();
     if (!c) return NextResponse.json({ valid: false, message: "请输入邀请码" });
 
-    try {
-      const d = await dbGet("invite_codes", `code=eq.${c}`, "is_used");
-      if (!d) return NextResponse.json({ valid: false, message: "邀请码不存在" });
-      if (d.is_used) return NextResponse.json({ valid: false, message: "该邀请码已被使用" });
-      return NextResponse.json({ valid: true, message: "验证通过" });
-    } catch {
-      return NextResponse.json({ valid: false, message: "邀请码不存在" });
-    }
+    if (!CODES.has(c)) return NextResponse.json({ valid: false, message: "邀请码无效" });
+    if (usedCodes.has(c)) return NextResponse.json({ valid: false, message: "该邀请码已被使用" });
+
+    return NextResponse.json({ valid: true, message: "验证通过" });
   } catch {
     return NextResponse.json({ valid: false, message: "验证服务异常" });
   }

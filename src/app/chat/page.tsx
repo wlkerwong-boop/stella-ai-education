@@ -14,6 +14,8 @@ import {
   LineChart,
   Plus,
 } from "lucide-react";
+import Navbar from "@/components/Navbar";
+import VoiceInput from "@/components/VoiceInput";
 import { WELCOME_MESSAGE, QUICK_QUESTIONS } from "@/lib/prompts";
 import {
   getCurrentSession,
@@ -199,24 +201,16 @@ export default function ChatPage() {
 
   return (
     <div className="min-h-screen bg-[#faf8f5] flex flex-col">
-      {/* Header */}
-      <header className="sticky top-0 z-50 bg-[#faf8f5]/90 backdrop-blur-md border-b border-[#e8e4df]">
-        <div className="max-w-4xl mx-auto px-4 h-14 flex items-center justify-between">
-          <Link
-            href="/"
-            className="flex items-center gap-2 text-[#9a9590] hover:text-[#2d2a26] transition-colors"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            <span className="text-sm">返回首页</span>
-          </Link>
+      <Navbar />
+      {/* Chat Header */}
+      <header className="bg-white border-b border-[#e8e4df]">
+        <div className="max-w-4xl mx-auto px-4 h-12 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="w-7 h-7 rounded-lg bg-[#c4753f] flex items-center justify-center">
               <Sparkles className="w-4 h-4 text-white" />
             </div>
-            <span className="font-medium text-[#2d2a26]">Stella老师</span>
-            <span className="px-2 py-0.5 rounded-full bg-[#e8f0ec] text-[#5a7a6a] text-xs">
-              在线
-            </span>
+            <span className="font-medium text-[#2d2a26] text-sm">Stella老师</span>
+            <span className="px-2 py-0.5 rounded-full bg-[#e8f0ec] text-[#5a7a6a] text-xs">在线</span>
           </div>
           <div className="flex items-center gap-3">
             <button
@@ -237,6 +231,23 @@ export default function ChatPage() {
           </div>
         </div>
       </header>
+
+      {/* 注册引导提示：对话超过2条后显示 */}
+      {messages.length > 3 && (
+        <div className="bg-gradient-to-r from-[#f5e6d8] to-[#faf8f5] border-b border-[#e8e4df]">
+          <div className="max-w-4xl mx-auto px-4 py-2.5 flex items-center justify-between">
+            <p className="text-xs text-[#7a6a5a]">
+              💡 您的对话记录已保存在本地。注册后可在成长图谱中保留所有对话记录。
+            </p>
+            <Link
+              href="/auth/login"
+              className="text-xs text-[#c4753f] font-medium hover:underline shrink-0 ml-2"
+            >
+              注册 →
+            </Link>
+          </div>
+        </div>
+      )}
 
       {/* Messages */}
       <main className="flex-1 overflow-y-auto">
@@ -344,6 +355,12 @@ export default function ChatPage() {
       <div className="border-t border-[#e8e4df] bg-white">
         <div className="max-w-4xl mx-auto px-4 py-4">
           <div className="flex items-end gap-3">
+            <VoiceInput
+              onResult={(text) => {
+                setInput((prev) => prev + (prev ? " " : "") + text);
+              }}
+              size="md"
+            />
             <textarea
               ref={inputRef}
               value={input}

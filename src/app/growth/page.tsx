@@ -20,6 +20,7 @@ import {
   Eye,
   EyeOff,
 } from "lucide-react";
+import Navbar from "@/components/Navbar";
 import {
   getAllSessions,
   getUserStats,
@@ -136,31 +137,7 @@ export default function GrowthPage() {
 
   return (
     <div className="min-h-screen bg-[#faf8f5]">
-      {/* Header */}
-      <header className="sticky top-0 z-50 bg-[#faf8f5]/90 backdrop-blur-md border-b border-[#e8e4df]">
-        <div className="max-w-4xl mx-auto px-4 h-14 flex items-center justify-between">
-          <Link
-            href="/"
-            className="flex items-center gap-2 text-[#9a9590] hover:text-[#2d2a26] transition-colors"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            <span className="text-sm">返回首页</span>
-          </Link>
-          <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-lg bg-[#5a7a6a] flex items-center justify-center">
-              <TrendingUp className="w-4 h-4 text-white" />
-            </div>
-            <span className="font-medium text-[#2d2a26]">思维进化图景</span>
-          </div>
-          <Link
-            href="/chat"
-            className="flex items-center gap-1.5 text-sm text-[#5a7a6a] hover:text-[#2d2a26] transition-colors"
-          >
-            <MessageCircle className="w-4 h-4" />
-            <span className="hidden sm:inline">继续咨询</span>
-          </Link>
-        </div>
-      </header>
+      <Navbar />
 
       <main className="max-w-4xl mx-auto px-4 py-8">
         {sessions.length === 0 ? (
@@ -255,6 +232,41 @@ export default function GrowthPage() {
                 </motion.div>
               ))}
             </motion.div>
+
+            {/* 分享按钮 */}
+            {stats.totalConversations > 0 && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.25 }}
+                className="flex justify-center mb-8"
+              >
+                <button
+                  onClick={() => {
+                    const text = [
+                      `🌱 我的教育成长图谱 - Stella教育智囊`,
+                      ``,
+                      `📊 对话次数：${stats.totalConversations} 次`,
+                      `📅 学习天数：${learningDays} 天`,
+                      `🛠 工具记录：${toolStats.totalRecords} 条`,
+                      `📍 当前阶段：${STAGES[currentStage].name}`,
+                      ``,
+                      `👇 你也来试试，用系统思维看见教育的整体`,
+                      `https://stella-ai-education.vercel.app`,
+                    ].join("\n");
+                    navigator.clipboard.writeText(text).then(() => {
+                      alert("✅ 成长图谱已复制，可以分享到小红书/朋友圈了！");
+                    });
+                  }}
+                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-white border border-[#e8e4df] text-sm text-[#5a7a6a] hover:bg-[#f0ece7] hover:border-[#c4753f] hover:text-[#c4753f] transition-all shadow-sm"
+                >
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+                  </svg>
+                  分享成长图谱
+                </button>
+              </motion.div>
+            )}
 
             {/* 成长阶段可视化 */}
             <motion.div

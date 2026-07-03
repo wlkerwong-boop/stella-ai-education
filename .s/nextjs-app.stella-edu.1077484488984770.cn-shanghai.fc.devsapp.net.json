@@ -1,0 +1,30 @@
+{
+  "domainName": "nextjs-app.stella-edu.1077484488984770.cn-shanghai.fc.devsapp.net",
+  "accountId": "1077484488984770",
+  "protocol": "HTTP",
+  "certConfig": null,
+  "tlsConfig": null,
+  "apiVersion": "2016-08-15",
+  "routeConfig": {
+    "routes": [
+      {
+        "path": "/*",
+        "accountId": null,
+        "apiVersion": "",
+        "serviceName": "stella-edu",
+        "functionName": "nextjs-app",
+        "qualifier": null,
+        "methods": null,
+        "rewriteConfig": null,
+        "innerRewriteConfig": null
+      }
+    ]
+  },
+  "createdTime": "2026-06-24T05:45:57Z",
+  "lastModifiedTime": "2026-06-24T06:06:46Z",
+  "keepFullPath": null,
+  "subdomainCount": null,
+  "wafConfig": {
+    "enableWAF": false
+  }
+}

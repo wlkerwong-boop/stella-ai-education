@@ -1,0 +1,51 @@
+{
+  "statefulConfig": {
+    "functionId": "216e7906-3ffc-44d5-af6a-eb7c0cc62ab1",
+    "functionName": "nextjs-app",
+    "description": "Next.js教育网站",
+    "runtime": "nodejs20",
+    "handler": "index.handler",
+    "timeout": 30,
+    "initializer": "",
+    "initializationTimeout": 3,
+    "codeSize": 12574411,
+    "codeChecksum": "15737919193470273202",
+    "memorySize": 512,
+    "gpuMemorySize": null,
+    "environmentVariables": {
+      "NEXT_PUBLIC_SUPABASE_ANON_KEY": "sb_publishable_yBYMK2lVhVeoR4XNHvrzfQ_hVXvUznS",
+      "NEXT_PUBLIC_SUPABASE_URL": "https://tnmbesyjsftephqmwsmw.supabase.co",
+      "NODE_ENV": "production",
+      "PORT": "9000",
+      "SILICONFLOW_API_KEY": "sk-voxraenxgvbopgchezlbkzpddapzvivtudfcregbslbuqcsa",
+      "SUPABASE_SERVICE_ROLE_KEY": "sb_secret_O56pTqkPlgre09xc0JOx2A_oIUfjpX3"
+    },
+    "createdTime": "2026-06-24T05:44:09Z",
+    "lastModifiedTime": "2026-06-24T06:06:23Z",
+    "instanceConcurrency": 10,
+    "instanceSoftConcurrency": null,
+    "customContainerConfig": null,
+    "caPort": null,
+    "instanceType": "e1",
+    "layers": null,
+    "layersArnV2": null,
+    "instanceLifecycleConfig": {
+      "preFreeze": {
+        "handler": "",
+        "timeout": 3,
+        "command": null
+      },
+      "preStop": {
+        "handler": "",
+        "timeout": 3,
+        "command": null
+      }
+    },
+    "customDNS": null,
+    "customRuntimeConfig": null,
+    "customHealthCheckConfig": null,
+    "sessionAffinity": null,
+    "initializerCommand": null,
+    "name": "nextjs-app"
+  }
+}
