@@ -1,0 +1,9 @@
+module.exports=[89578,a=>{a.v({className:"geist_a71539c9-module__T19VSG__className",variable:"geist_a71539c9-module__T19VSG__variable"})},35214,a=>{a.v({className:"geist_mono_8d43a2aa-module__8Li5zG__className",variable:"geist_mono_8d43a2aa-module__8Li5zG__variable"})},27572,a=>{"use strict";var b=a.i(7997),c=a.i(89578);let d={className:c.default.className,style:{fontFamily:"'Geist', 'Geist Fallback'",fontStyle:"normal"}};null!=c.default.variable&&(d.variable=c.default.variable);var e=a.i(35214);let f={className:e.default.className,style:{fontFamily:"'Geist Mono', 'Geist Mono Fallback'",fontStyle:"normal"}};null!=e.default.variable&&(f.variable=e.default.variable),a.s(["default",0,function({children:a}){return(0,b.jsx)("html",{lang:"zh-CN",children:(0,b.jsxs)("body",{className:`${d.variable} ${f.variable} antialiased min-h-screen`,children:[(0,b.jsx)("script",{dangerouslySetInnerHTML:{__html:`
+              if ("serviceWorker" in navigator) {
+                window.addEventListener("load", () => {
+                  navigator.serviceWorker.register("/sw.js");
+                });
+              }
+            `}}),a]})})},"metadata",0,{title:"Stella教育智囊 - AI时代的家庭教育伙伴",description:"基于Stella老师20多年教育经验，为家长提供系统化的教育问答、成长图谱和在线学习平台",manifest:"/manifest.json",icons:{icon:[{url:"/icons/icon-192.png",sizes:"192x192",type:"image/png"},{url:"/icons/icon-512.png",sizes:"512x512",type:"image/png"}],apple:[{url:"/icons/icon-192.png",sizes:"192x192"}]},appleWebApp:{capable:!0,title:"Stella教育智囊",statusBarStyle:"default"}},"viewport",0,{width:"device-width",initialScale:1,maximumScale:1}],27572)},50645,a=>{a.n(a.i(27572))}];
+
+//# sourceMappingURL=%5Broot-of-the-server%5D__0v73tbn._.js.map

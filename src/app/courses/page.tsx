@@ -14,6 +14,8 @@ import {
   Star,
 } from "lucide-react";
 
+import Navbar from "@/components/Navbar";
+
 const modules = [
   {
     id: 1,
@@ -236,25 +238,7 @@ const features = [
 export default function CoursesPage() {
   return (
     <div className="min-h-screen bg-[#faf8f5]">
-      {/* Header */}
-      <header className="sticky top-0 z-50 bg-[#faf8f5]/90 backdrop-blur-md border-b border-[#e8e4df]">
-        <div className="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between">
-          <Link
-            href="/"
-            className="flex items-center gap-2 text-[#9a9590] hover:text-[#2d2a26] transition-colors"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            <span className="text-sm">返回首页</span>
-          </Link>
-          <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-lg bg-[#c4753f] flex items-center justify-center">
-              <Sparkles className="w-4 h-4 text-white" />
-            </div>
-            <span className="font-medium text-[#2d2a26]">课程体系</span>
-          </div>
-          <div className="w-16" />
-        </div>
-      </header>
+      <Navbar />
 
       {/* Hero */}
       <section className="py-16 px-4">

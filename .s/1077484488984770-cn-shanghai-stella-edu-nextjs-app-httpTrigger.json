@@ -1,0 +1,29 @@
+{
+  "statefulConfig": {
+    "triggerName": "httpTrigger",
+    "description": "",
+    "triggerId": "2f8ab3fb-3f74-4452-ac0e-ffe375d9a2cb",
+    "sourceArn": null,
+    "triggerType": "http",
+    "invocationRole": null,
+    "qualifier": "LATEST",
+    "urlInternet": "https://nextjs-app-stella-edu-jbalbbjjti.cn-shanghai.fcapp.run",
+    "urlIntranet": "https://nextjs-app-stella-edu-jbalbbjjti.cn-shanghai-vpc.fcapp.run",
+    "triggerConfig": {
+      "methods": [
+        "GET",
+        "POST",
+        "PUT",
+        "DELETE",
+        "HEAD"
+      ],
+      "authType": "anonymous",
+      "disableURLInternet": false
+    },
+    "createdTime": "2026-06-24T05:45:45Z",
+    "lastModifiedTime": "2026-06-24T06:06:26Z",
+    "status": null,
+    "targetArn": null,
+    "name": "httpTrigger"
+  }
+}

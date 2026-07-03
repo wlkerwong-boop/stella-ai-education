@@ -1,0 +1,42 @@
+{
+  "statefulConfig": {
+    "serviceName": "stella-edu",
+    "description": "Stella教育智囊网站",
+    "role": "",
+    "logConfig": {
+      "project": "",
+      "logstore": "",
+      "enableRequestMetrics": false,
+      "enableInstanceMetrics": false,
+      "logBeginRule": "None",
+      "enableLlmMetrics": null
+    },
+    "serviceId": "11b7ad69-4fb9-408b-9b4e-b123966dee34",
+    "createdTime": "2026-06-24T05:40:08Z",
+    "lastModifiedTime": "2026-06-24T06:06:26Z",
+    "vpcConfig": {
+      "vpcId": "",
+      "vSwitchIds": [],
+      "securityGroupId": "",
+      "role": null,
+      "anytunnelViaENI": null
+    },
+    "internetAccess": true,
+    "nasConfig": {
+      "userId": -1,
+      "groupId": -1,
+      "mountPoints": []
+    },
+    "ossMountConfig": {
+      "mountPoints": []
+    },
+    "vendorConfig": null,
+    "tracingConfig": {
+      "type": null,
+      "params": null,
+      "jaegerConfig": null
+    },
+    "useSLRAuthentication": false,
+    "name": "stella-edu"
+  }
+}

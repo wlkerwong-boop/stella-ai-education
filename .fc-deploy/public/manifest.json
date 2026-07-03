@@ -1,0 +1,25 @@
+{
+  "name": "Stella教育智囊",
+  "short_name": "Stella教育",
+  "description": "基于Stella老师20年教育经验，为家长提供系统化的教育问答、成长图谱和在线学习平台",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#faf8f5",
+  "theme_color": "#c4753f",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["education", "parenting"]
+}

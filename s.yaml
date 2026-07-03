@@ -1,0 +1,52 @@
+edition: 1.0.0
+name: stella-education
+access: "aliyun-stella"
+
+vars:
+  region: "cn-shanghai"
+
+services:
+  nextjs-app:
+    component: "devsapp/fc"
+    props:
+      region: ${vars.region}
+      service:
+        name: "stella-edu"
+        description: "Stella教育智囊网站"
+        internetAccess: true
+      function:
+        name: "nextjs-app"
+        description: "Next.js教育网站"
+        runtime: "nodejs20"
+        codeUri: "./.fc-deploy"
+        handler: "index.handler"
+        timeout: 60
+        memorySize: 1024
+        instanceConcurrency: 10
+        environmentVariables:
+          NODE_ENV: "production"
+          PORT: "9000"
+          SILICONFLOW_API_KEY: "sk-voxraenxgvbopgchezlbkzpddapzvivtudfcregbslbuqcsa"
+          NEXT_PUBLIC_SUPABASE_URL: "https://tnmbesyjsftephqmwsmw.supabase.co"
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: "sb_publishable_yBYMK2lVhVeoR4XNHvrzfQ_hVXvUznS"
+          SUPABASE_SERVICE_ROLE_KEY: "sb_secret_O56pTqkPlgre09xc0JOx2A_oIUfjpX3"
+      triggers:
+        - name: "httpTrigger"
+          type: "http"
+          qualifier: "LATEST"
+          config:
+            authType: "anonymous"
+            disableURLInternet: false
+            methods:
+              - "GET"
+              - "POST"
+              - "PUT"
+              - "DELETE"
+              - "HEAD"
+      customDomains:
+        - domainName: "auto"
+          protocol: "HTTP"
+          routeConfigs:
+            - path: "/*"
+              serviceName: "stella-edu"
+              functionName: "nextjs-app"
