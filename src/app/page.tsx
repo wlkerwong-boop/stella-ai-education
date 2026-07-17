@@ -27,9 +27,12 @@ export default function Home() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
           >
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#f5e6d8] text-[#c4753f] text-sm mb-8">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-[#e8d5c4] bg-[#f5e6d8]/70 backdrop-blur-sm text-[#c4753f] text-sm mb-8">
               <Sparkles className="w-4 h-4" />
               基于20年教育经验的AI智慧伙伴
+              <span className="ml-1 px-2 py-0.5 rounded-full bg-[#c4753f] text-white text-[11px] font-semibold tracking-wider">
+                FGAOS V4.0
+              </span>
             </div>
           </motion.div>
 
@@ -63,7 +66,7 @@ export default function Home() {
           >
             <Link
               href="/chat"
-              className="flex items-center gap-2 px-8 py-4 rounded-full bg-[#c4753f] text-white font-medium hover:bg-[#a86235] transition-colors shadow-lg shadow-[#c4753f]/20"
+              className="flex items-center gap-2 px-8 py-4 rounded-full bg-gradient-to-r from-[#c4753f] to-[#b06a38] text-white font-medium shadow-lg shadow-[#c4753f]/20 hover:-translate-y-0.5 hover:shadow-xl transition-all group"
             >
               <MessageCircle className="w-5 h-5" />
               免费向Stella老师提问
@@ -98,12 +101,13 @@ export default function Home() {
 
           <div className="grid md:grid-cols-3 gap-8">
             {/* Feature 1 */}
+            <Link href="/chat" className="block">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5 }}
-              className="group p-8 rounded-2xl bg-[#faf8f5] border border-[#e8e4df] hover:border-[#c4753f]/30 transition-all hover:shadow-lg"
+              className="group p-8 rounded-2xl bg-[#faf8f5] border border-[#e8e4df] hover:border-[#c4753f]/30 transition-all hover:shadow-lg hover:-translate-y-1 cursor-pointer"
             >
               <div className="w-12 h-12 rounded-xl bg-[#f5e6d8] flex items-center justify-center mb-6 group-hover:bg-[#c4753f] transition-colors">
                 <Brain className="w-6 h-6 text-[#c4753f] group-hover:text-white transition-colors" />
@@ -123,7 +127,12 @@ export default function Home() {
                   冰山理论
                 </span>
               </div>
+              <div className="mt-6 flex items-center gap-1 text-sm font-medium text-[#c4753f] opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all">
+                进入体验
+                <ArrowRight className="w-4 h-4" />
+              </div>
             </motion.div>
+            </Link>
 
             {/* Feature 2 */}
             <Link href="/growth" className="block">
@@ -156,12 +165,13 @@ export default function Home() {
             </Link>
 
             {/* Feature 3 */}
+            <Link href="/courses" className="block">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: 0.2 }}
-              className="group p-8 rounded-2xl bg-[#faf8f5] border border-[#e8e4df] hover:border-[#8b7355]/30 transition-all hover:shadow-lg"
+              className="group p-8 rounded-2xl bg-[#faf8f5] border border-[#e8e4df] hover:border-[#8b7355]/30 transition-all hover:shadow-lg hover:-translate-y-1 cursor-pointer"
             >
               <div className="w-12 h-12 rounded-xl bg-[#f0ebe4] flex items-center justify-center mb-6 group-hover:bg-[#8b7355] transition-colors">
                 <Users className="w-6 h-6 text-[#8b7355] group-hover:text-white transition-colors" />
@@ -181,7 +191,12 @@ export default function Home() {
                   线下咨询
                 </span>
               </div>
+              <div className="mt-6 flex items-center gap-1 text-sm font-medium text-[#8b7355] opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all">
+                了解更多
+                <ArrowRight className="w-4 h-4" />
+              </div>
             </motion.div>
+            </Link>
           </div>
         </div>
       </section>
@@ -325,7 +340,7 @@ export default function Home() {
               <Sparkles className="w-4 h-4 text-white" />
             </div>
             <span className="text-sm text-[#9a9590]">
-              Stella教育智囊 - AI时代的家庭教育伙伴
+              Stella教育智囊 · FGAOS V4.0 · AI时代的家庭教育伙伴
             </span>
           </div>
           <p className="text-xs text-[#9a9590]">
