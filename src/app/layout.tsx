@@ -59,6 +59,12 @@ export default function RootLayout({
           }}
         />
         {children}
+        <footer style={{ textAlign: 'center', padding: '16px', fontSize: '12px', color: '#888' }}>
+          <a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer"
+             style={{ color: '#888', textDecoration: 'none' }}>
+            粤ICP备2026087672号-1
+          </a>
+        </footer>
       </body>
     </html>
   );
