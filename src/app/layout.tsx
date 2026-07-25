@@ -59,6 +59,15 @@ export default function RootLayout({
           }}
         />
         {children}
+        {/* ── R5: 三站通路 → soulcode 入口 ── */}
+        <div style={{ textAlign: 'center', padding: '8px', fontSize: '12px', color: '#888' }}>
+          <a href="https://aisoulcode.cn" target="_blank" rel="noopener noreferrer"
+             style={{ color: '#5a7a6a', textDecoration: 'none', marginRight: '16px' }}>
+            🔮 灵魂解码 — 七系统AI融合报告
+          </a>
+          <span style={{ color: '#ccc' }}>|</span>
+          <span style={{ marginLeft: '16px', color: '#aaa' }}>见己学园 · 即将上线</span>
+        </div>
         <footer style={{ textAlign: 'center', padding: '16px', fontSize: '12px', color: '#888' }}>
           <a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer"
              style={{ color: '#888', textDecoration: 'none' }}>
