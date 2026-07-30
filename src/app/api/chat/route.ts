@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { STELLA_SYSTEM_PROMPT } from "@/lib/prompts";
 import { searchKnowledge } from "@/lib/knowledge-base";
+import { classifyCrisis } from "@/lib/crisis";
 
 export const runtime = "edge";
 
@@ -64,6 +65,28 @@ export async function POST(req: NextRequest) {
     const latestUserMessage = messages
       .filter((m: { role: string }) => m.role === "user")
       .pop()?.content;
+
+    // === 危机检测（C 部分：高风险词断流 → 旗舰模型研判） ===
+    if (latestUserMessage) {
+      const crisisResult = await classifyCrisis(
+        latestUserMessage,
+        apiKey,
+        AI_CONFIG.baseURL,
+        AI_CONFIG.model
+      );
+      if (crisisResult.triggered) {
+        return NextResponse.json({
+          content: crisisResult.script,
+          role: "assistant",
+          crisis: {
+            triggered: true,
+            subject: crisisResult.subject,
+            level: crisisResult.level,
+            lockPage: crisisResult.lockPage,
+          },
+        });
+      }
+    }
 
     let knowledgeContext = "";
     if (latestUserMessage) {
