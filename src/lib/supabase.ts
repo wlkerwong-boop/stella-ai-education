@@ -1,12 +1,11 @@
 // Supabase REST API 封装
-// 使用硬编码值（后续改回环境变量）
+// anon key 可公开，service_role 操作走 /api/stella-admin
 
 const SB_URL = "https://tnmbesyjsftephqmwsmw.supabase.co";
-const SB_KEY = "sb_secret_O56pTqkPlgre09xc0JOx2A_oIUfjpX3";
 const SB_ANON = "sb_publishable_yBYMK2lVhVeoR4XNHvrzfQ_hVXvUznS";
 
 async function supFetch(path: string, opts: any = {}) {
-  const key = opts.anon ? SB_ANON : SB_KEY;
+  const key = SB_ANON;
   const res = await fetch(`${SB_URL}${path}`, {
     method: opts.method || "GET",
     headers: {
@@ -42,16 +41,8 @@ export async function dbDelete(table: string, filter: string) {
   return supFetch(`/rest/v1/${table}?${filter}`, { method: "DELETE" });
 }
 
-export async function authCreateUser(email: string, password: string) {
-  return supFetch("/auth/v1/admin/users", { method: "POST", body: { email, password, email_confirm: true } });
-}
-
-export async function authDeleteUser(uid: string) {
-  return supFetch(`/auth/v1/admin/users/${uid}`, { method: "DELETE" });
-}
-
 export async function authLogin(email: string, password: string) {
-  return supFetch(`/auth/v1/token?grant_type=password`, { method: "POST", body: { email, password }, anon: true });
+  return supFetch(`/auth/v1/token?grant_type=password`, { method: "POST", body: { email, password } });
 }
 
 export async function authGetUser(token: string) {
