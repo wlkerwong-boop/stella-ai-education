@@ -36,13 +36,9 @@ ${text.trim()}
 4. 行动决定要具体、可执行、有明确时间
 5. 用自然的中文表达，不要生硬的翻译腔`;
 
-    const apiKey = process.env.SILICONFLOW_API_KEY || process.env.DEEPSEEK_API_KEY || "";
-    const baseURL = process.env.SILICONFLOW_API_KEY
-      ? "https://api.siliconflow.cn/v1"
-      : "https://api.deepseek.com/v1";
-    const model = process.env.SILICONFLOW_API_KEY
-      ? "deepseek-ai/DeepSeek-V3"
-      : "deepseek-chat";
+    const apiKey = process.env.DEEPSEEK_API_KEY || "";
+    const baseURL = "https://api.deepseek.com/v1";
+    const model = "deepseek-v4-flash";
 
     const response = await fetch(`${baseURL}/chat/completions`, {
       method: "POST",

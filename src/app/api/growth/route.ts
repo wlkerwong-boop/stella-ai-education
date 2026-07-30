@@ -4,14 +4,14 @@ import { MIND_EVOLUTION_PROMPT } from "@/lib/prompts";
 export const runtime = "edge";
 
 const AI_CONFIG = {
-  provider: "siliconflow",
-  baseURL: "https://api.siliconflow.cn/v1",
-  model: "deepseek-ai/DeepSeek-V3",
+  provider: "deepseek",
+  baseURL: "https://api.deepseek.com/v1",
+  model: "deepseek-v4-flash",
 };
 
 function getApiKey(): string {
-  if (AI_CONFIG.provider === "siliconflow") {
-    return process.env.SILICONFLOW_API_KEY || "";
+  if (AI_CONFIG.provider === "deepseek") {
+    return process.env.DEEPSEEK_API_KEY || "";
   }
   return "";
 }
