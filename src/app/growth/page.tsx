@@ -33,6 +33,12 @@ import {
   ToolRecord,
   getCurrentStudent,
 } from "@/lib/tools-storage";
+import {
+  getToolUsageByUser,
+  getToolUsageStats,
+  type ToolUsageRecord,
+} from "@/lib/tool-usage-storage";
+import { getToolById } from "@/lib/tool-definitions";
 
 interface AnalysisResult {
   analysis: string;
@@ -59,6 +65,8 @@ export default function GrowthPage() {
   const [currentStage, setCurrentStage] = useState(0);
   const [toolRecords, setToolRecords] = useState<ToolRecord[]>([]);
   const [toolStats, setToolStats] = useState({ totalRecords: 0, byType: {} as Record<string, number> });
+  const [usageRecords, setUsageRecords] = useState<ToolUsageRecord[]>([]);
+  const [usageStats, setUsageStats] = useState({ totalRecords: 0, byTool: {} as Record<string, number> });
 
   useEffect(() => {
     const allSessions = getAllSessions();
@@ -78,6 +86,11 @@ export default function GrowthPage() {
       const records = getToolRecordsByUser(student.userId);
       setToolRecords(records.slice(0, 5));
       setToolStats(getToolStats(student.userId));
+
+      // 加载新工具使用记录
+      const usageRecs = getToolUsageByUser(student.userId);
+      setUsageRecords(usageRecs.slice(0, 5));
+      setUsageStats(getToolUsageStats(student.userId));
     }
   }, []);
 
@@ -197,7 +210,7 @@ export default function GrowthPage() {
                 {
                   icon: ClipboardList,
                   label: "工具记录",
-                  value: toolStats.totalRecords,
+                  value: toolStats.totalRecords + usageStats.totalRecords,
                   color: "#e88d5a",
                   bg: "#fce8d8",
                 },
@@ -517,6 +530,84 @@ export default function GrowthPage() {
                           </div>
                           <div className="flex items-center gap-2 flex-shrink-0">
                             {record.visibility === "public" ? (
+                              <span className="flex items-center gap-1 px-2 py-1 rounded-md bg-[#f5e6d8] text-[#c4753f] text-xs">
+                                🌐 公开
+                              </span>
+                            ) : record.visibility === "shared-with-stella" ? (
+                              <span className="flex items-center gap-1 px-2 py-1 rounded-md bg-[#e8f0ec] text-[#5a7a6a] text-xs">
+                                <Eye className="w-3 h-3" />
+                                Stella可见
+                              </span>
+                            ) : (
+                              <span className="flex items-center gap-1 px-2 py-1 rounded-md bg-[#f5f0eb] text-[#9a9590] text-xs">
+                                <EyeOff className="w-3 h-3" />
+                                仅自己
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </motion.div>
+            )}
+
+            {/* 新工具使用记录 */}
+            {usageRecords.length > 0 && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.55 }}
+                className="bg-white rounded-2xl border border-[#e8e4df] p-6 mt-6"
+              >
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-2">
+                    <ClipboardList className="w-5 h-5 text-[#c4753f]" />
+                    <h3 className="font-semibold text-[#2d2a26]">工具练习记录</h3>
+                  </div>
+                  <Link
+                    href="/tools"
+                    className="text-xs text-[#5a7a6a] hover:text-[#2d2a26] transition-colors"
+                  >
+                    去工具台 →
+                  </Link>
+                </div>
+                <div className="space-y-3">
+                  {usageRecords.map((record) => {
+                    const tool = getToolById(record.tool_definition_id);
+                    const iconEmoji: Record<string, string> = {
+                      Map: "🗺️", Star: "⭐", ListChecks: "✅", Footprints: "👣",
+                      Gauge: "📊", BookOpen: "📖", RefreshCw: "🔄", Brain: "🧠",
+                    };
+                    return (
+                      <div
+                        key={record.id}
+                        className="p-3 rounded-xl bg-[#faf8f5] border border-[#e8e4df] hover:border-[#c4753f]/30 transition-colors"
+                      >
+                        <div className="flex items-start justify-between gap-4">
+                          <div className="flex items-center gap-2 min-w-0">
+                            <span className="text-lg">
+                              {tool ? (iconEmoji[tool.icon] || "📋") : "📋"}
+                            </span>
+                            <div className="min-w-0">
+                              <div className="text-sm font-medium text-[#2d2a26] truncate">
+                                {tool?.name || record.tool_definition_id}
+                              </div>
+                              <div className="text-xs text-[#9a9590]">
+                                {record.child_stage || "未选阶段"}
+                                {record.orid_summary?.O && ` · ${record.orid_summary.O.slice(0, 20)}...`}
+                                {" · "}
+                                {new Date(record.created_at).toLocaleDateString("zh-CN", { month: "short", day: "numeric" })}
+                              </div>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2 flex-shrink-0">
+                            {record.status === "withdrawn" ? (
+                              <span className="px-2 py-1 rounded-md bg-red-50 text-red-400 text-xs">
+                                已撤销
+                              </span>
+                            ) : record.visibility === "public" ? (
                               <span className="flex items-center gap-1 px-2 py-1 rounded-md bg-[#f5e6d8] text-[#c4753f] text-xs">
                                 🌐 公开
                               </span>

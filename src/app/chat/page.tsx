@@ -129,6 +129,19 @@ export default function ChatPage() {
       );
       setShowQuickQuestions(false);
     }
+
+    // 处理来自工具台的「提问示范」预设 prompt（?prompt=xxx）
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const preset = params.get("prompt");
+      if (preset && !saved) {
+        // 只有新对话（无已保存会话）时才自动填入
+        const decoded = decodeURIComponent(preset);
+        setInput(decoded);
+        setShowQuickQuestions(false);
+        // 不自动发送，让用户确认后再发
+      }
+    }
   }, []);
 
   useEffect(() => {

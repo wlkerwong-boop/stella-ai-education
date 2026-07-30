@@ -7,83 +7,32 @@ import { motion } from "framer-motion";
 import {
   Sparkles,
   MessageCircle,
-  BookOpen,
-  Brain,
   Heart,
-  Target,
-  Zap,
   Calendar,
   ClipboardList,
-  Thermometer,
-  IceCream,
-  Compass,
-  Star,
   BarChart3,
   LogOut,
   ArrowLeft,
   Eye,
   EyeOff,
+  AlertTriangle,
 } from "lucide-react";
-import { getCurrentStudent, logoutStudent, getToolRecordsByUser, getToolStats, ToolRecord } from "@/lib/tools-storage";
+import { getCurrentStudent, logoutStudent, getToolRecordsByUser, getToolStats, type ToolRecord } from "@/lib/tools-storage";
+import { getApprovedTools, getToolPresetQuestions } from "@/lib/tool-definitions";
+import { getToolUsageByUser, getToolUsageStats } from "@/lib/tool-usage-storage";
 
-const TOOLS = [
-  {
-    id: "orid" as const,
-    name: "ORID反思模版",
-    desc: "四步深度反思：客观事实→感受反应→意义解读→行动决定",
-    icon: Brain,
-    color: "#c4753f",
-    bg: "#f5e6d8",
-    href: "/tools/orid",
-    session: "课后/每日反思",
-  },
-  {
-    id: "emotion" as const,
-    name: "情绪温度计",
-    desc: "每日记录情绪状态，识别情绪模式，看见成长的轨迹",
-    icon: Thermometer,
-    color: "#e88d5a",
-    bg: "#fce8d8",
-    href: "/tools/emotion",
-    session: "每日打卡",
-  },
-  {
-    id: "iceberg" as const,
-    name: "冰山觉察日记",
-    desc: "用冰山模型探索行为背后的内在世界，从表面到深层",
-    icon: IceCream,
-    color: "#5a7a6a",
-    bg: "#e8f0ec",
-    href: "/tools/iceberg",
-    session: "有情绪触动时",
-  },
-  {
-    id: "action-card" as const,
-    name: "知行合一践行卡",
-    desc: "每周一个小行动，把课堂所学真正活出来",
-    icon: Compass,
-    color: "#8b7355",
-    bg: "#f0ebe4",
-    href: "/tools/action-card",
-    session: "每周践行",
-  },
-  {
-    id: "character" as const,
-    name: "5C品格自测",
-    desc: "从品格、能力、关怀、连接、信心五个维度审视自己的成长",
-    icon: Star,
-    color: "#6b8f7a",
-    bg: "#e0f0e8",
-    href: "/tools/character",
-    session: "每月自测",
-  },
-];
+const ICON_EMOJI: Record<string, string> = {
+  Map: "🗺️", Star: "⭐", ListChecks: "✅", Footprints: "👣",
+  Gauge: "📊", BookOpen: "📖", RefreshCw: "🔄", Brain: "🧠",
+};
 
 export default function ToolsPage() {
   const router = useRouter();
+  const tools = getApprovedTools();
   const [user, setUser] = useState(getCurrentStudent());
   const [records, setRecords] = useState<ToolRecord[]>([]);
   const [stats, setStats] = useState({ totalRecords: 0, byType: {} as Record<string, number> });
+  const [usageStats, setUsageStats] = useState({ totalRecords: 0, byTool: {} as Record<string, number> });
 
   useEffect(() => {
     const currentUser = getCurrentStudent();
@@ -92,6 +41,7 @@ export default function ToolsPage() {
       const userRecords = getToolRecordsByUser(currentUser.userId);
       setRecords(userRecords.slice(0, 10));
       setStats(getToolStats(currentUser.userId));
+      setUsageStats(getToolUsageStats(currentUser.userId));
     }
   }, []);
 
@@ -133,10 +83,13 @@ export default function ToolsPage() {
     setStats({ totalRecords: 0, byType: {} });
   };
 
-  const getTypeName = (type: string) => {
-    const tool = TOOLS.find((t) => t.id === type);
-    return tool?.name || type;
+  const handleAskStella = (toolId: string) => {
+    const presets = getToolPresetQuestions(toolId);
+    const prompt = presets[0] || "我想聊聊关于工具的使用";
+    router.push(`/chat?prompt=${encodeURIComponent(prompt)}`);
   };
+
+  const totalAllRecords = stats.totalRecords + usageStats.totalRecords;
 
   const formatDate = (ts: number) => {
     return new Date(ts).toLocaleDateString("zh-CN", {
@@ -195,7 +148,7 @@ export default function ToolsPage() {
           </div>
           <div className="flex items-center gap-3">
             <div className="text-right">
-              <div className="text-lg font-bold text-[#c4753f]">{stats.totalRecords}</div>
+              <div className="text-lg font-bold text-[#c4753f]">{totalAllRecords}</div>
               <div className="text-xs text-[#9a9590]">累计记录</div>
             </div>
             <button
@@ -210,54 +163,100 @@ export default function ToolsPage() {
 
         {/* Tool Cards Grid */}
         <div className="grid md:grid-cols-2 gap-4 mb-10">
-          {TOOLS.map((tool, i) => {
-            const count = stats.byType[tool.id] || 0;
+          {tools.map((tool, i) => {
+            const count = usageStats.byTool[tool.tool_id] || 0;
             return (
               <motion.div
-                key={tool.id}
+                key={tool.tool_id}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.08 }}
+                transition={{ delay: i * 0.06 }}
               >
-                <Link
-                  href={tool.href}
-                  className="block group"
-                >
-                  <div className="p-6 rounded-2xl bg-white border border-[#e8e4df] hover:shadow-lg hover:border-[#c4753f]/20 transition-all">
-                    <div className="flex items-start justify-between mb-4">
-                      <div
-                        className="w-12 h-12 rounded-xl flex items-center justify-center transition-colors group-hover:scale-110"
-                        style={{ backgroundColor: tool.bg }}
-                      >
-                        <tool.icon className="w-6 h-6" style={{ color: tool.color }} />
-                      </div>
-                      {count > 0 && (
-                        <span
-                          className="px-2 py-1 rounded-full text-xs font-medium"
-                          style={{ backgroundColor: tool.bg, color: tool.color }}
+                <div className="group relative">
+                  <Link
+                    href={`/tools/${tool.tool_id}`}
+                    className="block"
+                  >
+                    <div className="p-5 rounded-2xl bg-white border border-[#e8e4df] hover:shadow-lg hover:border-[#c4753f]/20 transition-all">
+                      {/* Top Row: Icon + Badge */}
+                      <div className="flex items-start justify-between mb-3">
+                        <div
+                          className="w-12 h-12 rounded-xl flex items-center justify-center text-2xl transition-transform group-hover:scale-110"
+                          style={{ backgroundColor: tool.icon_bg }}
                         >
-                          已用 {count} 次
-                        </span>
+                          {ICON_EMOJI[tool.icon] || "📋"}
+                        </div>
+                        <div className="flex items-center gap-1.5">
+                          {count > 0 && (
+                            <span
+                              className="px-2 py-0.5 rounded-full text-xs font-medium"
+                              style={{ backgroundColor: tool.icon_bg, color: tool.icon_color }}
+                            >
+                              已用 {count} 次
+                            </span>
+                          )}
+                          <span className="px-2 py-0.5 rounded-full bg-[#f5f0eb] text-[#9a9590] text-xs">
+                            {tool.estimated_time}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Name + Desc */}
+                      <h3 className="text-lg font-semibold text-[#2d2a26] mb-1">
+                        {tool.name}
+                      </h3>
+
+                      {/* Stages */}
+                      <div className="flex flex-wrap gap-1 mb-2">
+                        {tool.applicable_stages.map(s => (
+                          <span
+                            key={s}
+                            className="px-2 py-0.5 rounded-md text-xs"
+                            style={{ backgroundColor: tool.icon_bg, color: tool.icon_color }}
+                          >
+                            {s}
+                          </span>
+                        ))}
+                      </div>
+
+                      {/* Pain Points */}
+                      <div className="flex flex-wrap gap-1 mb-3">
+                        {tool.pain_points.slice(0, 3).map(p => (
+                          <span key={p} className="px-2 py-0.5 rounded-full bg-[#f5f0eb] text-[#9a9590] text-xs">
+                            {p}
+                          </span>
+                        ))}
+                        {tool.pain_points.length > 3 && (
+                          <span className="text-xs text-[#9a9590]">+{tool.pain_points.length - 3}</span>
+                        )}
+                      </div>
+
+                      {/* Not-for Warning */}
+                      {tool.not_for.length > 0 && (
+                        <div className="flex items-start gap-1 text-xs text-red-400 mb-3">
+                          <AlertTriangle className="w-3 h-3 mt-0.5 flex-shrink-0" />
+                          <span>{tool.not_for[0]}</span>
+                        </div>
                       )}
                     </div>
-                    <h3 className="text-lg font-semibold text-[#2d2a26] mb-1">
-                      {tool.name}
-                    </h3>
-                    <p className="text-sm text-[#9a9590] leading-relaxed mb-3">
-                      {tool.desc}
-                    </p>
-                    <span className="inline-flex items-center gap-1 text-xs text-[#5a7a6a]">
-                      <Calendar className="w-3 h-3" />
-                      {tool.session}
-                    </span>
-                  </div>
-                </Link>
+                  </Link>
+
+                  {/* "提问示范"浮动按钮 */}
+                  <button
+                    onClick={() => handleAskStella(tool.tool_id)}
+                    className="absolute bottom-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity px-3 py-1.5 rounded-lg bg-[#c4753f] text-white text-xs font-medium hover:bg-[#a86235] flex items-center gap-1 shadow-sm"
+                    title="先用这个话题问问 Stella"
+                  >
+                    <MessageCircle className="w-3 h-3" />
+                    提问示范
+                  </button>
+                </div>
               </motion.div>
             );
           })}
         </div>
 
-        {/* Recent Records */}
+        {/* Recent Records (legacy + new) */}
         {records.length > 0 && (
           <motion.div
             initial={{ opacity: 0 }}
@@ -270,7 +269,14 @@ export default function ToolsPage() {
             </div>
             <div className="space-y-3">
               {records.map((record) => {
-                const tool = TOOLS.find((t) => t.id === record.toolType);
+                const toolNames: Record<string, string> = {
+                  orid: "ORID反思", emotion: "情绪打卡", iceberg: "冰山日记",
+                  "action-card": "践行卡", character: "品格自测",
+                };
+                const toolIcons: Record<string, string> = {
+                  orid: "🧠", emotion: "🌡️", iceberg: "🧊",
+                  "action-card": "🧭", character: "⭐",
+                };
                 return (
                   <div
                     key={record.id}
@@ -278,35 +284,26 @@ export default function ToolsPage() {
                   >
                     <div className="flex items-center justify-between gap-4">
                       <div className="flex items-center gap-3 min-w-0">
-                        <div
-                          className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
-                          style={{ backgroundColor: tool?.bg || "#f5e6d8" }}
-                        >
-                          {tool && <tool.icon className="w-4 h-4" style={{ color: tool.color }} />}
-                        </div>
+                        <span className="text-lg">{toolIcons[record.toolType] || "📋"}</span>
                         <div className="min-w-0">
                           <div className="text-sm font-medium text-[#2d2a26] truncate">
                             {record.title}
                           </div>
                           <div className="text-xs text-[#9a9590]">
-                            {tool?.name} · {formatDate(record.createdAt)}
+                            {toolNames[record.toolType] || record.toolType} · {formatDate(record.createdAt)}
                           </div>
                         </div>
                       </div>
                       <div className="flex items-center gap-2 flex-shrink-0">
                         {record.visibility === "public" ? (
-                          <span className="flex items-center gap-1 px-2 py-1 rounded-md bg-[#f5e6d8] text-[#c4753f] text-xs">
-                            🌐 公开
-                          </span>
+                          <span className="flex items-center gap-1 px-2 py-1 rounded-md bg-[#f5e6d8] text-[#c4753f] text-xs">🌐 公开</span>
                         ) : record.visibility === "shared-with-stella" ? (
                           <span className="flex items-center gap-1 px-2 py-1 rounded-md bg-[#e8f0ec] text-[#5a7a6a] text-xs">
-                            <Eye className="w-3 h-3" />
-                            Stella可见
+                            <Eye className="w-3 h-3" />Stella可见
                           </span>
                         ) : (
                           <span className="flex items-center gap-1 px-2 py-1 rounded-md bg-[#f5f0eb] text-[#9a9590] text-xs">
-                            <EyeOff className="w-3 h-3" />
-                            仅自己
+                            <EyeOff className="w-3 h-3" />仅自己
                           </span>
                         )}
                       </div>
