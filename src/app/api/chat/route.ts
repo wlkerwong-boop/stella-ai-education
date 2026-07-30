@@ -14,10 +14,10 @@ const AI_CONFIG = {
   // baseURL: "https://api.siliconflow.cn/v1",
   // model: "deepseek-ai/DeepSeek-V3",
 
-  // 选项2：DeepSeek
+  // 选项2：DeepSeek V4 Flash（deepseek-chat 已于 2026-07-24 停用）
   provider: "deepseek",
   baseURL: "https://api.deepseek.com/v1",
-  model: "deepseek-chat",
+  model: "deepseek-v4-flash",
 
   // 选项3：Anthropic Claude (付费，效果最好)
   // provider: "anthropic",
