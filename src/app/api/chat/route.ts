@@ -9,14 +9,14 @@ export const runtime = "edge";
 const AI_CONFIG = {
   // 选项1：硅基流动 (推荐，新用户送¥14，兼容OpenAI格式)
   // 注册：https://cloud.siliconflow.cn/
-  provider: "siliconflow",
-  baseURL: "https://api.siliconflow.cn/v1",
-  model: "deepseek-ai/DeepSeek-V3", // 或 "Qwen/Qwen2.5-72B-Instruct"
+  // provider: "siliconflow",
+  // baseURL: "https://api.siliconflow.cn/v1",
+  // model: "deepseek-ai/DeepSeek-V3",
 
-  // 选项2：DeepSeek (也有免费额度)
-  // provider: "deepseek",
-  // baseURL: "https://api.deepseek.com/v1",
-  // model: "deepseek-chat",
+  // 选项2：DeepSeek
+  provider: "deepseek",
+  baseURL: "https://api.deepseek.com/v1",
+  model: "deepseek-chat",
 
   // 选项3：Anthropic Claude (付费，效果最好)
   // provider: "anthropic",
@@ -40,10 +40,10 @@ function getApiKey(): string {
 
 export async function POST(req: NextRequest) {
   try {
-    const { messages } = await req.json();
-const recentMessages = messages.slice(-2); // 只保留最近1轮
+    const body = await req.json();
+    const messages = Array.isArray(body?.messages) ? body.messages : null;
 
-    if (!messages || !Array.isArray(messages)) {
+    if (!messages) {
       return NextResponse.json(
         { error: "Invalid messages format" },
         { status: 400 }
@@ -125,10 +125,11 @@ const recentMessages = messages.slice(-2); // 只保留最近1轮
       });
     }
 
-    return NextResponse.json(
-      { error: "Unexpected response format" },
-      { status: 500 }
-    );
+    // 友好兜底：模型未返回有效内容（如拒答、超限等）
+    return NextResponse.json({
+      content: "抱歉，暂时无法回答这个问题。请换个方式再试一次。",
+      role: "assistant",
+    });
   } catch (error) {
     console.error("Chat API error:", error);
     return NextResponse.json(
