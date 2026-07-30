@@ -14,7 +14,7 @@ import {
   type ChildStage, type InputField,
 } from "@/lib/tool-definitions";
 import { getCurrentStudent } from "@/lib/tools-storage";
-import { saveToolUsage, type Visibility } from "@/lib/tool-usage-storage";
+import { saveToolUsage, withdrawToolUsage, type Visibility } from "@/lib/tool-usage-storage";
 import { detectCrisisKeywords, CRISIS_SCRIPTS } from "@/lib/crisis";
 
 const ALL_STAGES: ChildStage[] = ["0-3岁", "3-6岁", "1-3年级", "4-6年级", "初中", "高中"];
@@ -50,7 +50,7 @@ export default function ToolPage({ params }: { params: Promise<{ toolId: string 
   const [saved, setSaved] = useState(false);
   const [savedRecordId, setSavedRecordId] = useState<string | null>(null);
   const [showScript, setShowScript] = useState(false);
-  const [crisisWarning, setCrisisWarning] = useState<string | null>(null);
+  const [crisisLocked, setCrisisLocked] = useState(false);
 
   // Redirect if tool not found or not logged in
   useEffect(() => {
@@ -74,13 +74,10 @@ export default function ToolPage({ params }: { params: Promise<{ toolId: string 
     ? tool.operation_steps[step]
     : null;
 
-  // 检查当前输入是否包含危机关键词
+  // 危机检测：命中即中断工具流程，切换危机契约（规格卡要求）
   const checkCrisis = (value: string) => {
     if (detectCrisisKeywords(value)) {
-      setCrisisWarning(
-        "系统检测到你输入的内容可能涉及安全风险。请注意：这是一个教育工具，不是危机支持服务。如果有即时危险，请联系当地紧急服务。工具流程将继续，但建议优先处理安全问题。\n\n" +
-        CRISIS_SCRIPTS.child.R1
-      );
+      setCrisisLocked(true);
     }
   };
 
@@ -91,17 +88,14 @@ export default function ToolPage({ params }: { params: Promise<{ toolId: string 
 
   const handleNext = () => {
     if (isOnStageSelect && !childStage) return;
-    setCrisisWarning(null);
     setStep(s => Math.min(s + 1, totalSteps + 1));
   };
 
   const handlePrev = () => {
-    setCrisisWarning(null);
     setStep(s => Math.max(s - 1, -1));
   };
 
   const handleSkip = () => {
-    setCrisisWarning(null);
     setStep(s => Math.min(s + 1, totalSteps + 1));
   };
 
@@ -127,10 +121,10 @@ export default function ToolPage({ params }: { params: Promise<{ toolId: string 
 
   const handleWithdraw = () => {
     if (savedRecordId) {
-      // 撤回：重新打开页面，清除保存状态
+      withdrawToolUsage(savedRecordId);
       setSaved(false);
       setSavedRecordId(null);
-      setStep(totalSteps); // 回到 ORID 页
+      setStep(totalSteps); // 回到 ORID 页重新填写
     }
   };
 
@@ -148,40 +142,41 @@ export default function ToolPage({ params }: { params: Promise<{ toolId: string 
     router.push(`/chat?prompt=${encodeURIComponent(text)}`);
   };
 
-  // ====== 渲染 ======
-
-  // 危机警告弹窗
-  const CrisisOverlay = crisisWarning && (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4"
-    >
-      <motion.div
-        initial={{ scale: 0.95 }}
-        animate={{ scale: 1 }}
-        className="bg-white rounded-2xl p-6 max-w-md w-full shadow-2xl border border-red-200"
-      >
-        <div className="flex items-start gap-3 mb-4">
-          <div className="w-10 h-10 rounded-xl bg-red-100 flex items-center justify-center flex-shrink-0">
-            <ShieldAlert className="w-5 h-5 text-red-600" />
-          </div>
-          <div>
-            <h3 className="font-semibold text-red-700 mb-1">安全提醒</h3>
-            <p className="text-sm text-[#2d2a26] leading-relaxed whitespace-pre-wrap">
-              {crisisWarning}
-            </p>
-          </div>
-        </div>
-        <button
-          onClick={() => setCrisisWarning(null)}
-          className="w-full py-2.5 rounded-xl bg-red-600 text-white text-sm font-medium hover:bg-red-700 transition-colors"
+  // ====== 危机锁页：命中即中断工具流程，切换危机契约 ======
+  if (crisisLocked) {
+    return (
+      <div className="min-h-screen bg-[#faf8f5] flex items-center justify-center px-4">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="max-w-md w-full bg-white rounded-2xl border-2 border-red-200 shadow-xl p-6"
         >
-          我知道了，继续
-        </button>
-      </motion.div>
-    </motion.div>
-  );
+          <div className="flex items-start gap-3 mb-4">
+            <div className="w-12 h-12 rounded-xl bg-red-100 flex items-center justify-center flex-shrink-0">
+              <ShieldAlert className="w-6 h-6 text-red-600" />
+            </div>
+            <div>
+              <h2 className="text-lg font-bold text-red-700 mb-2">安全提醒</h2>
+              <p className="text-sm text-[#2d2a26] leading-relaxed whitespace-pre-wrap">
+                {CRISIS_SCRIPTS.child.R1}
+              </p>
+            </div>
+          </div>
+          <p className="text-xs text-[#9a9590] mb-4">
+            工具流程已暂停。如有即时危险，请拨打 110 或前往最近医院急诊。
+          </p>
+          <Link
+            href="/tools"
+            className="block w-full py-3 rounded-xl bg-red-600 text-white text-sm font-medium hover:bg-red-700 transition-colors text-center"
+          >
+            退出工具台
+          </Link>
+        </motion.div>
+      </div>
+    );
+  }
+
+  // ====== 渲染 ======
 
   // 完成页
   if (isComplete && saved) {
@@ -207,7 +202,7 @@ export default function ToolPage({ params }: { params: Promise<{ toolId: string 
               ))}
             </div>
             <p className="text-xs text-[#9a9590] mt-3">
-              {/* 请 K3 补审 */}记录已加密存储，仅你本人可见。可在成长图谱中随时查看或撤销。
+              {/* 请 K3 补审 */}记录已保存。可在成长图谱中随时查看或撤销。
             </p>
           </div>
 
@@ -239,8 +234,6 @@ export default function ToolPage({ params }: { params: Promise<{ toolId: string 
 
   return (
     <div className="min-h-screen bg-[#faf8f5]">
-      {CrisisOverlay}
-
       {/* Header */}
       <header className="sticky top-0 z-40 bg-[#faf8f5]/90 backdrop-blur-md border-b border-[#e8e4df]">
         <div className="max-w-4xl mx-auto px-4 h-14 flex items-center justify-between">
