@@ -108,6 +108,7 @@ export async function classifyCrisis(
         ],
         temperature: 0,
         max_tokens: 50,
+        thinking: { type: "disabled" },
       }),
       signal: controller.signal,
     });

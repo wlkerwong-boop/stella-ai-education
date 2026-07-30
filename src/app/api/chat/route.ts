@@ -122,6 +122,7 @@ export async function POST(req: NextRequest) {
         ],
         temperature: 0.7,
         max_tokens: 1200,
+        thinking: { type: "disabled" },
       }),
     });
 
