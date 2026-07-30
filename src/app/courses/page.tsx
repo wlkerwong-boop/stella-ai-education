@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { motion } from "framer-motion";
 import {
-  ArrowLeft,
   BookOpen,
   Users,
   Video,
@@ -133,16 +132,17 @@ const modules = [
   {
     id: 8,
     title: "模块八：自我管理",
-    description: "识别情绪、觉知行为，进行自我调整和管理",
+    description: "建立能启动、能稳定、能恢复、能持续升级的自我管理系统",
     duration: "4周",
     lessons: 4,
     topics: [
-      "情绪识别与情绪调节",
-      "自我觉知与行为管理",
-      "适应环境与迎接挑战",
-      "建立个人目标与执行系统",
+      "看见系统：八要素与反馈循环",
+      "启动系统：目标、动机与能力",
+      "稳定系统：情绪、压力与精力",
+      "升级系统：反馈、反思与调整",
     ],
-    status: "即将开课",
+    status: "已开课",
+    link: "/courses/module8",
     color: "#8a7a5a",
     bgColor: "#f0ece4",
   },

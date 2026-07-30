@@ -1,3 +1,5 @@
+import { module8KnowledgeItems } from "@/lib/module8-knowledge";
+
 // Stella老师家庭教育知识库
 // 基于课程资料整理，用于RAG检索和AI问答
 
@@ -10,6 +12,7 @@ export interface KnowledgeItem {
 }
 
 export const knowledgeBase: KnowledgeItem[] = [
+  ...module8KnowledgeItems,
   // ===== 模块一：系统思维 =====
   {
     id: "sys-001",
