@@ -22,6 +22,8 @@ import {
   startNewSession,
   ChatMessage,
 } from "@/lib/storage";
+import { getQuotaSummary, recordQuotaUsage } from "@/lib/quota";
+import { logUsage } from "@/lib/usage-log";
 
 interface Message {
   role: "user" | "assistant";
@@ -159,6 +161,11 @@ export default function ChatPage() {
     }
   }, [messages]);
 
+  /** 剥离不可见 ORID 标记块，防止系统字段泄露给用户 */
+  const stripOridBlock = (text: string): string => {
+    return text.replace(/<!--\s*ORID[\s\S]*?-->/g, "").trim();
+  };
+
   const handleSubmit = async (text: string) => {
     if (!text.trim() || isLoading) return;
 
@@ -168,13 +175,19 @@ export default function ChatPage() {
     setIsLoading(true);
     setShowQuickQuestions(false);
 
+    // G2 配额：读取当前用量，传给服务器检查
+    const quotaSummary = getQuotaSummary("anonymous");
+    const quotaUsage = { daily: quotaSummary.dailyUsed, monthly: quotaSummary.monthlyUsed };
+
     try {
+      const requestStart = Date.now();
       const response = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           messages: [...messages, userMessage],
           userId: "anonymous",
+          quotaUsage,
         }),
       });
 
@@ -185,10 +198,38 @@ export default function ChatPage() {
       }
 
       const data = await response.json();
+
+      // R2：剥离 ORID 标记块，用户不可见
+      const cleanContent = stripOridBlock(data.content || "");
+
       setMessages((prev) => [
         ...prev,
-        { role: "assistant", content: data.content, timestamp: Date.now() },
+        { role: "assistant", content: cleanContent, timestamp: Date.now() },
       ]);
+
+      // G2 配额：调用成功后增加计数
+      recordQuotaUsage("anonymous");
+
+      // G3 usage 日志：记录本次调用的元数据
+      if (data.usage) {
+        logUsage({
+          timestamp: Date.now(),
+          userId: "anonymous",
+          tier: data.usage.tier || "free",
+          model: data.usage.model || "",
+          promptTokens: data.usage.promptTokens || 0,
+          completionTokens: data.usage.completionTokens || 0,
+          totalTokens: data.usage.totalTokens || 0,
+          latencyMs: Date.now() - requestStart,
+          mode: data.usage.mode || "unknown",
+          crisisChecked: data.usage.crisisChecked || false,
+          crisisTriggered: data.usage.crisisTriggered || false,
+          userMessageLength: text.length,
+          quotaRemainingDaily: data.quota?.dailyRemaining ?? -1,
+          quotaRemainingMonthly: data.quota?.monthlyRemaining ?? -1,
+          success: true,
+        });
+      }
     } catch (err: any) {
       const errorMsg = err?.message || "网络请求失败";
       setMessages((prev) => [
