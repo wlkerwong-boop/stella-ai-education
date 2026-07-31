@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { MIND_EVOLUTION_PROMPT } from "@/lib/prompts";
+import { classifyCrisis } from "@/lib/crisis";
 
 export const runtime = "edge";
 
@@ -33,6 +34,27 @@ export async function POST(req: NextRequest) {
         { error: "API key not configured" },
         { status: 500 }
       );
+    }
+
+    // P3-2: 危机检测 — 只检最新一条 user 消息，历史消息不追溯
+    const latestUserMsg = [...messages]
+      .reverse()
+      .find((m: { role: string }) => m.role === "user");
+    if (latestUserMsg?.content) {
+      const crisisResult = await classifyCrisis(
+        latestUserMsg.content, apiKey, AI_CONFIG.baseURL, AI_CONFIG.model
+      );
+      if (crisisResult.triggered) {
+        return NextResponse.json({
+          analysis: crisisResult.script,
+          crisis: {
+            triggered: true,
+            subject: crisisResult.subject,
+            level: crisisResult.level,
+            lockPage: crisisResult.lockPage,
+          },
+        });
+      }
     }
 
     // 格式化对话历史用于分析
@@ -82,7 +104,7 @@ ${conversationHistory.slice(0, 4000)}
         model: AI_CONFIG.model,
         messages: [{ role: "user", content: analysisPrompt }],
         temperature: 0.7,
-        max_tokens: 2500,
+        max_tokens: 1800,
       }),
     });
 

@@ -374,7 +374,10 @@ export default function GrowthPage() {
                   )}
                 </button>
                 <p className="text-xs text-[#9a9590] mt-3">
-                  基于您与Stella老师的{stats.totalQuestions}次问答，AI将为您生成个性化成长分析
+                  {isLoading
+                    ? <>报告生成中，通常需要 20 秒左右，请稍候{/* 请 K3 补审 */}</>
+                    : `基于您与Stella老师的${stats.totalQuestions}次问答，AI将为您生成个性化成长分析`
+                  }
                 </p>
               </motion.div>
             )}

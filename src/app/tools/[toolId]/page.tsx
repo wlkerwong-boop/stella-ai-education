@@ -51,6 +51,8 @@ export default function ToolPage({ params }: { params: Promise<{ toolId: string 
   const [savedRecordId, setSavedRecordId] = useState<string | null>(null);
   const [showScript, setShowScript] = useState(false);
   const [crisisLocked, setCrisisLocked] = useState(false);
+  const [crisisScript, setCrisisScript] = useState(CRISIS_SCRIPTS.child.R2); // 默认偏安全
+  const [crisisClassifying, setCrisisClassifying] = useState(false);
 
   // Redirect if tool not found or not logged in
   useEffect(() => {
@@ -75,9 +77,28 @@ export default function ToolPage({ params }: { params: Promise<{ toolId: string 
     : null;
 
   // 危机检测：命中即中断工具流程，切换危机契约（规格卡要求）
-  const checkCrisis = (value: string) => {
-    if (detectCrisisKeywords(value)) {
-      setCrisisLocked(true);
+  const checkCrisis = async (value: string) => {
+    if (!detectCrisisKeywords(value)) return;
+    // 先锁页（用默认 R2 话术），再请求 API 分级
+    setCrisisLocked(true);
+    setCrisisClassifying(true);
+    try {
+      const res = await fetch("/api/crisis/classify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text: value }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.triggered && data.script) {
+          setCrisisScript(data.script);
+        }
+      }
+      // API 失败/超时：保持默认 R2 话术，偏安全
+    } catch {
+      // 网络错误：保持默认
+    } finally {
+      setCrisisClassifying(false);
     }
   };
 
@@ -129,9 +150,54 @@ export default function ToolPage({ params }: { params: Promise<{ toolId: string 
   };
 
   const buildOutput = (): Record<string, any> => {
+    // 按工具 outputs 各项映射到已填写的对应输入字段值
+    // 映射规则：output 描述匹配 input.field（部分匹配即可）
     const output: Record<string, any> = {};
+    const outputFieldMap: Record<string, string[]> = {
+      "八要素雷达式摘要": ["goal_fact", "motivation_fact", "ability_fact", "emotion_fact", "energy_fact", "environment_fact", "feedback_fact", "adjustment_fact"],
+      "一条主要连接": ["selected_factors"],
+      "一个最值得先试的调整点": ["first_adjustment"],
+      "一周后观察指标": ["observation_metric"],
+      "梦想清单": ["experience_wish", "learn_wish", "help_wish", "create_wish"],
+      "孩子自主选出的 1-3 项": ["selected_wishes"],
+      "每项的第一个小行动": ["first_action"],
+      "需要家长支持的资源": ["support_needed"],
+      "孩子自己排序的三件事": ["planned_order", "task1", "task2", "task3"],
+      "开始时点": ["planned_order"],
+      "最低完成标准": ["min_standard"],
+      "晚间复盘入口": ["completion_fact"],
+      "最小启动动作": ["micro_step"],
+      "3-5 步任务链": ["micro_step"],
+      "家长支持级别": ["support_level"],
+      "撤架条件": ["scaffold_removal"],
+      "当前仪表盘（情绪/压力/精力）": ["emotion_label", "stress_score", "energy_score"],
+      "高耗能任务建议时段": ["current_state"],
+      "一个减阻动作": ["adjustment_action"],
+      "一个恢复动作": ["adjustment_action"],
+      "复测时间": ["recheck_at"],
+      "当日三条成长摘要": ["learned", "loved", "lesson"],
+      "一个明日提醒": ["tomorrow_note"],
+      "连续记录趋势": ["recorded_at"],
+      "保留项": ["keep"],
+      "改变项": ["change"],
+      "尝试项": ["try"],
+      "下一轮观察指标": ["next_review"],
+      "一条去标识化成长事件": ["objective"],
+      "选定行动": ["decisional"],
+      "后续复盘日期": ["review_date"],
+    };
+
     for (const o of tool.outputs) {
-      output[o] = "已记录";
+      const mappedFields = outputFieldMap[o];
+      if (mappedFields) {
+        const values = mappedFields
+          .map(f => formData[f])
+          .filter(v => v !== undefined && v !== "");
+        output[o] = values.length > 0 ? values.join("；") : "";
+      } else {
+        // 无映射 → 留空，不填「已记录」
+        output[o] = "";
+      }
     }
     return output;
   };
@@ -158,7 +224,8 @@ export default function ToolPage({ params }: { params: Promise<{ toolId: string 
             <div>
               <h2 className="text-lg font-bold text-red-700 mb-2">安全提醒</h2>
               <p className="text-sm text-[#2d2a26] leading-relaxed whitespace-pre-wrap">
-                {CRISIS_SCRIPTS.child.R1}
+                {crisisScript}
+                {crisisClassifying && <span className="text-[#9a9590]">（安全评估中...）</span>}
               </p>
             </div>
           </div>
@@ -584,10 +651,10 @@ export default function ToolPage({ params }: { params: Promise<{ toolId: string 
                 {/* 可见性 */}
                 <label className="text-xs text-[#9a9590] mb-2 block">记录可见范围</label>
                 <div className="flex items-center gap-1 bg-[#f5f0eb] rounded-xl p-1">
+                  {/* public 档二期再开，当前仅两选 */}
                   {([
                     { v: "private" as const, label: "仅自己", icon: EyeOff },
                     { v: "shared-with-stella" as const, label: "Stella可见", icon: Eye },
-                    { v: "public" as const, label: "公开", icon: null },
                   ]).map(({ v, label, icon: Icon }) => (
                     <button
                       key={v}
@@ -599,7 +666,6 @@ export default function ToolPage({ params }: { params: Promise<{ toolId: string 
                       }`}
                     >
                       {Icon && <Icon className="w-3 h-3" />}
-                      {v === "public" && "🌐 "}
                       {label}
                     </button>
                   ))}

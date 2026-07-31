@@ -32,9 +32,16 @@ interface Message {
   timestamp?: number;
 }
 
+/** 剥离不可见 ORID 标记块，防止系统字段泄露给用户 */
+function stripOridBlock(text: string): string {
+  return text.replace(/<!--\s*ORID[\s\S]*?-->/g, "").trim();
+}
+
 // 轻量Markdown渲染组件
 function SimpleMarkdown({ content }: { content: string }) {
-  const lines = content.split("\n");
+  // P3-7: 渲染层剥离 ORID，messages 保留原始 content
+  const clean = stripOridBlock(content);
+  const lines = clean.split("\n");
   const elements: React.ReactElement[] = [];
 
   for (let i = 0; i < lines.length; i++) {
@@ -162,11 +169,6 @@ export default function ChatPage() {
     }
   }, [messages]);
 
-  /** 剥离不可见 ORID 标记块，防止系统字段泄露给用户 */
-  const stripOridBlock = (text: string): string => {
-    return text.replace(/<!--\s*ORID[\s\S]*?-->/g, "").trim();
-  };
-
   const handleSubmit = async (text: string) => {
     if (!text.trim() || isLoading) return;
 
@@ -200,12 +202,10 @@ export default function ChatPage() {
 
       const data = await response.json();
 
-      // R2：剥离 ORID 标记块，用户不可见
-      const cleanContent = stripOridBlock(data.content || "");
-
+      // P3-7: messages 保留原始 content（含 ORID 块），渲染层剥离
       setMessages((prev) => [
         ...prev,
-        { role: "assistant", content: cleanContent, timestamp: Date.now() },
+        { role: "assistant", content: data.content || "", timestamp: Date.now() },
       ]);
 
       // G2 配额：调用成功后增加计数
