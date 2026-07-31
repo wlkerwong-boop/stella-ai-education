@@ -14,7 +14,6 @@ import {
   LineChart,
   Plus,
 } from "lucide-react";
-import Navbar from "@/components/Navbar";
 import VoiceInput from "@/components/VoiceInput";
 import { WELCOME_MESSAGE, QUICK_QUESTIONS } from "@/lib/prompts";
 import {
@@ -214,7 +213,6 @@ export default function ChatPage() {
 
   return (
     <div className="min-h-screen bg-[#faf8f5] flex flex-col">
-      <Navbar />
       {/* Chat Header */}
       <header className="bg-white border-b border-[#e8e4df]">
         <div className="max-w-4xl mx-auto px-4 h-12 flex items-center justify-between">

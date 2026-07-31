@@ -1,38 +1,71 @@
 @import "tailwindcss";
 
-:root {
-  --background: #faf8f5;
-  --foreground: #2d2a26;
-  --primary: #c4753f;
-  --primary-light: #f5e6d8;
-  --secondary: #5a7a6a;
-  --secondary-light: #e8f0ec;
-  --accent: #8b7355;
-  --muted: #9a9590;
-  --card: #ffffff;
-  --border: #e8e4df;
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+/* ============================================================
+   Stella 暖沙 + 珊瑚橘 主题 (Override @jianji/ui theme)
+   CSS Custom Properties for shared component library.
+   ============================================================ */
+
+[data-theme="stella"] {
+  --color-primary: #FDF8F3;
+  --color-primary-light: #FFFBF7;
+  --color-primary-dark: #E8D5BC;
+
+  --color-accent: #E07A5F;
+  --color-accent-light: #F09A7E;
+  --color-accent-dark: #C05A3F;
+
+  --color-bg: #FDF8F3;
+  --color-bg-alt: #F5E6D3;
+  --color-bg-card: rgba(255, 255, 255, 0.92);
+
+  --color-text: #2D2A26;
+  --color-text-muted: #6B6560;
+  --color-text-dim: #9A9590;
+
+  --color-border: rgba(106, 101, 96, 0.12);
+  --color-border-hover: rgba(224, 122, 95, 0.4);
+
+  --color-navbar-bg: rgba(253, 248, 243, 0.65);
+  --color-navbar-blur: saturate(180%) blur(20px);
+
+  --color-shadow: rgba(0, 0, 0, 0.06);
+  --color-card-shadow: rgba(224, 122, 95, 0.1);
+
+  --font-family: "LXGW WenKai", "Noto Serif SC", "Songti SC", serif;
+  --font-family-mono: "JetBrains Mono", "Fira Code", monospace;
+
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-full: 9999px;
+
+  --transition-fast: 150ms ease;
+  --transition-base: 300ms ease;
+  --transition-slow: 500ms ease;
+
+  --navbar-height: 64px;
+  --navbar-scroll-offset: 100px;
 }
 
+/* Tailwind v4 theme tokens (inline) */
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --color-primary: var(--primary);
-  --color-primary-light: var(--primary-light);
-  --color-secondary: var(--secondary);
-  --color-secondary-light: var(--secondary-light);
-  --color-accent: var(--accent);
-  --color-muted: var(--muted);
-  --color-card: var(--card);
-  --color-border: var(--border);
+  --color-background: var(--color-bg, #FDF8F3);
+  --color-foreground: var(--color-text, #2D2A26);
+  --color-primary: var(--color-accent, #E07A5F);
+  --color-primary-light: var(--color-accent-light, #F09A7E);
+  --color-secondary: #5A7A6A;
+  --color-secondary-light: #E8F0EC;
+  --color-accent: #8B7355;
+  --color-muted: var(--color-text-dim, #9A9590);
+  --color-card: var(--color-bg-card, rgba(255,255,255,0.92));
+  --color-border: var(--color-border, rgba(106,101,96,0.12));
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
+  background: var(--color-bg);
+  color: var(--color-text);
   font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
 }
 
@@ -46,12 +79,12 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--border);
+  background: var(--color-border);
   border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--muted);
+  background: var(--color-text-dim);
 }
 
 /* Smooth scrolling */

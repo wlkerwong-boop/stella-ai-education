@@ -13,8 +13,6 @@ import {
   Star,
 } from "lucide-react";
 
-import Navbar from "@/components/Navbar";
-
 const modules = [
   {
     id: 1,
@@ -238,7 +236,6 @@ const features = [
 export default function CoursesPage() {
   return (
     <div className="min-h-screen bg-[#faf8f5]">
-      <Navbar />
 
       {/* Hero */}
       <section className="py-16 px-4">

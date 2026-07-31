@@ -1,6 +1,10 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import "@jianji/ui/styles/theme.css";
 import "./globals.css";
+import { Navbar, Footer } from "@/components/ui-client";
+import { Sparkles } from "lucide-react";
+import Link from "next/link";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -42,7 +46,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="zh-CN">
+    <html lang="zh-CN" data-theme="stella">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen`}
       >
@@ -58,7 +62,50 @@ export default function RootLayout({
             `,
           }}
         />
-        {children}
+
+        <Navbar
+          logo={
+            <Link href="/" className="flex items-center gap-2 no-underline">
+              <div className="w-7 h-7 rounded-md bg-[var(--color-accent)] flex items-center justify-center">
+                <Sparkles className="w-4 h-4 text-white" />
+              </div>
+              <span className="font-semibold text-[var(--color-text)]">Stella教育智囊</span>
+            </Link>
+          }
+          links={[
+            { label: "课程学习", href: "/courses" },
+            { label: "学员工具台", href: "/tools" },
+            { label: "成长图谱", href: "/growth" },
+          ]}
+          cta={{ label: "开始咨询", href: "/chat" }}
+        />
+
+        <main className="min-h-screen">{children}</main>
+
+        <Footer
+          brand="Stella教育智囊"
+          description="基于Stella老师20年教育经验，融合系统思维、冰山理论、品格教育，为家长提供AI驱动的家庭教育支持。"
+          columns={[
+            {
+              title: "服务导航",
+              links: [
+                { label: "AI教育问答", href: "/chat" },
+                { label: "成长图谱", href: "/growth" },
+                { label: "课程学习", href: "/courses" },
+              ],
+            },
+            {
+              title: "学员工具",
+              links: [
+                { label: "学员工具台", href: "/tools" },
+                { label: "冰山分析", href: "/tools/iceberg" },
+                { label: "情绪觉察", href: "/tools/emotion" },
+              ],
+            },
+          ]}
+          copyright="© {year} Stella教育智囊 · FGAOS V4.0 · AI时代的家庭教育伙伴"
+        />
+
         {/* ── R5: 三站通路 → soulcode 入口 ── */}
         <div style={{ textAlign: 'center', padding: '8px', fontSize: '12px', color: '#888' }}>
           <a href="https://aisoulcode.cn" target="_blank" rel="noopener noreferrer"

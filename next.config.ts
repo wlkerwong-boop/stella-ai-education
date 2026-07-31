@@ -5,6 +5,7 @@ const nextConfig: NextConfig = {
   images: {
     unoptimized: true,
   },
+  transpilePackages: ["@jianji/ui"],
   async redirects() {
     return [
       {

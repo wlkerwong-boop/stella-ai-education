@@ -20,7 +20,6 @@ import {
   Eye,
   EyeOff,
 } from "lucide-react";
-import Navbar from "@/components/Navbar";
 import {
   getAllSessions,
   getUserStats,
@@ -150,7 +149,6 @@ export default function GrowthPage() {
 
   return (
     <div className="min-h-screen bg-[#faf8f5]">
-      <Navbar />
 
       <main className="max-w-4xl mx-auto px-4 py-8">
         {sessions.length === 0 ? (
