@@ -70,7 +70,30 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // === G2 配额检查 ===
+    // === 提取最新用户消息（危机检测和路由共用） ===
+    const latestUserMessage = messages
+      .filter((m: { role: string }) => m.role === "user")
+      .pop()?.content || "";
+
+    // === 危机检测（C 部分：无条件优先于一切商业限流） ===
+    // crisis.ts 已上线，本路由只调其 classifyCrisis，不修改危机逻辑
+    const crisisResult = await classifyCrisis(
+      latestUserMessage, apiKey, AI_CONFIG.baseURL, AI_CONFIG.model
+    );
+    if (crisisResult.triggered) {
+      return NextResponse.json({
+        content: crisisResult.script,
+        role: "assistant",
+        crisis: {
+          triggered: true,
+          subject: crisisResult.subject,
+          level: crisisResult.level,
+          lockPage: crisisResult.lockPage,
+        },
+      });
+    }
+
+    // === G2 配额检查（危机未触发时才执行） ===
     const tier = getUserTier(userId);
     const tierConfig = getTierConfig(tier);
     const quotaUsage = body?.quotaUsage || { daily: 0, monthly: 0 };
@@ -95,27 +118,6 @@ export async function POST(req: NextRequest) {
     }
 
     // === RAG: 知识库检索 ===
-    const latestUserMessage = messages
-      .filter((m: { role: string }) => m.role === "user")
-      .pop()?.content || "";
-
-    // === 危机检测（C 部分：高风险词断流 → 旗舰模型研判） ===
-    // crisis.ts 已上线，本路由只调其 classifyCrisis，不修改危机逻辑
-    const crisisResult = await classifyCrisis(
-      latestUserMessage, apiKey, AI_CONFIG.baseURL, AI_CONFIG.model
-    );
-    if (crisisResult.triggered) {
-      return NextResponse.json({
-        content: crisisResult.script,
-        role: "assistant",
-        crisis: {
-          triggered: true,
-          subject: crisisResult.subject,
-          level: crisisResult.level,
-          lockPage: crisisResult.lockPage,
-        },
-      });
-    }
 
     // === E/T 双模式路由 ===
     const detectedMode = detectMode(latestUserMessage);
