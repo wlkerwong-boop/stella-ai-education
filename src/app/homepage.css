@@ -1,0 +1,562 @@
+/* ============================================================
+   三站统一设计系统 · 生命教育主线
+   字体：霞鹜文楷（CDN）+ 衬线兜底
+   ============================================================ */
+:root {
+  --radius-card: 16px;
+  --radius-pill: 999px;
+  --shadow-soft: 0 8px 32px rgba(0, 0, 0, 0.08);
+  --shadow-lift: 0 16px 48px rgba(0, 0, 0, 0.16);
+  --ease: cubic-bezier(0.4, 0, 0.2, 1);
+  --maxw: 1100px;
+}
+
+/* ---- SoulCode：深靛蓝 + 暖金 ---- */
+body[data-site="soulcode"] {
+  --bg: #0B1120;
+  --bg-soft: #131B2E;
+  --surface: rgba(255, 255, 255, 0.045);
+  --border: rgba(212, 175, 55, 0.22);
+  --accent: #D4AF37;
+  --accent-soft: rgba(212, 175, 55, 0.12);
+  --text: #E9EDF5;
+  --text-dim: rgba(233, 237, 245, 0.66);
+  --btn-text: #0B1120;
+}
+
+/* ---- Stella：暖沙 + 珊瑚橘 ---- */
+body[data-site="stella"] {
+  --bg: #FDF8F3;
+  --bg-soft: #F7EFE7;
+  --surface: rgba(255, 255, 255, 0.72);
+  --border: rgba(224, 122, 95, 0.22);
+  --accent: #E07A5F;
+  --accent-soft: rgba(224, 122, 95, 0.10);
+  --text: #3D405B;
+  --text-dim: rgba(61, 64, 91, 0.66);
+  --btn-text: #FFFFFF;
+}
+
+/* ---- 见己学园：松烟绿 + 米白 ---- */
+body[data-site="jianji"] {
+  --bg: #F4F7F5;
+  --bg-soft: #EBF1ED;
+  --surface: rgba(255, 255, 255, 0.72);
+  --border: rgba(93, 140, 115, 0.24);
+  --accent: #5D8C73;
+  --accent-soft: rgba(93, 140, 115, 0.10);
+  --text: #2C3E33;
+  --text-dim: rgba(44, 62, 51, 0.66);
+  --btn-text: #FFFFFF;
+}
+
+/* The homepage owns the visual footer; keep the global legal rail on inner pages. */
+body[data-site="stella"] .stella-global-rail { display: none; }
+body[data-site="stella"] .stella-global-nav,
+body[data-site="stella"] .stella-global-footer,
+body[data-site="stella"] .stella-global-rail { display: none; }
+
+/* The homepage owns the visual footer; keep the global legal rail on inner pages. */
+body[data-site="stella"] .stella-global-rail { display: none; }
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: "LXGW WenKai", "Songti SC", "STSong", Georgia, serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.9;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+img { display: block; max-width: 100%; }
+a { color: inherit; text-decoration: none; }
+
+/* ============ 导航栏 ============ */
+.nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px clamp(20px, 5vw, 48px);
+  transition: background 0.35s var(--ease), backdrop-filter 0.35s var(--ease), box-shadow 0.35s var(--ease);
+}
+.nav.scrolled {
+  background: color-mix(in srgb, var(--bg) 72%, transparent);
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+  box-shadow: 0 1px 0 var(--border);
+}
+.nav-logo {
+  font-size: 1.15rem;
+  letter-spacing: 0.18em;
+  font-weight: 600;
+}
+.nav-logo em { color: var(--accent); font-style: normal; }
+.nav-links {
+  display: flex;
+  gap: clamp(16px, 3vw, 36px);
+  font-size: 0.92rem;
+  color: var(--text-dim);
+}
+.nav-links a { transition: color 0.3s var(--ease); }
+.nav-links a:hover { color: var(--accent); }
+.nav-links .nav-cta {
+  color: var(--accent);
+  border: 1px solid var(--border);
+  padding: 4px 18px;
+  border-radius: var(--radius-pill);
+}
+
+/* ============ Hero 首屏 ============ */
+.hero {
+  position: relative;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 120px 24px 80px;
+  overflow: hidden;
+}
+.hero-bg {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  transform: scale(1.04);
+}
+.hero-veil {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--bg) 55%, transparent) 0%,
+    color-mix(in srgb, var(--bg) 30%, transparent) 40%,
+    color-mix(in srgb, var(--bg) 88%, transparent) 100%
+  );
+}
+body[data-site="soulcode"] .hero-veil {
+  background: linear-gradient(
+    180deg,
+    rgba(11, 17, 32, 0.42) 0%,
+    rgba(11, 17, 32, 0.18) 40%,
+    rgba(11, 17, 32, 0.92) 100%
+  );
+}
+.hero-content { position: relative; z-index: 2; max-width: 720px; }
+.hero-kicker {
+  font-size: 0.85rem;
+  letter-spacing: 0.5em;
+  color: var(--accent);
+  margin-bottom: 28px;
+  text-indent: 0.5em;
+}
+.hero-title {
+  font-size: clamp(2.3rem, 7.2vw, 3.6rem);
+  letter-spacing: 0.08em;
+  line-height: 1.35;
+  margin-bottom: 24px;
+  text-shadow: 0 2px 24px rgba(0, 0, 0, 0.35);
+}
+body[data-site="stella"] .hero-title,
+body[data-site="jianji"] .hero-title {
+  text-shadow: 0 1px 12px rgba(255, 255, 255, 0.5);
+}
+.hero-sub {
+  font-size: clamp(0.98rem, 2.6vw, 1.12rem);
+  color: var(--text-dim);
+  max-width: 30em;
+  margin: 0 auto 48px;
+}
+body[data-site="stella"] .hero-sub,
+body[data-site="jianji"] .hero-sub {
+  color: rgba(30, 35, 40, 0.78);
+  text-shadow: 0 1px 10px rgba(255, 255, 255, 0.45);
+}
+.hero-cta {
+  display: inline-block;
+  background: var(--accent);
+  color: var(--btn-text);
+  padding: 15px 44px;
+  border-radius: var(--radius-pill);
+  font-size: 1rem;
+  letter-spacing: 0.12em;
+  transition: transform 0.3s var(--ease), box-shadow 0.3s var(--ease);
+  box-shadow: 0 8px 28px color-mix(in srgb, var(--accent) 38%, transparent);
+}
+.hero-cta:hover { transform: translateY(-3px); box-shadow: 0 14px 36px color-mix(in srgb, var(--accent) 48%, transparent); }
+.hero-scroll {
+  position: absolute;
+  bottom: 32px;
+  left: 50%;
+  transform: translateX(-50%);
+  color: var(--text-dim);
+  font-size: 0.8rem;
+  letter-spacing: 0.3em;
+  z-index: 2;
+  animation: bob 2.4s var(--ease) infinite;
+}
+@keyframes bob {
+  0%, 100% { transform: translate(-50%, 0); opacity: 0.55; }
+  50% { transform: translate(-50%, 8px); opacity: 1; }
+}
+
+/* ============ 通用区块 ============ */
+.section { padding: clamp(72px, 11vw, 120px) 24px; }
+.section-inner { max-width: var(--maxw); margin: 0 auto; }
+.section-head { text-align: center; margin-bottom: clamp(44px, 7vw, 72px); }
+.section-kicker {
+  font-size: 0.8rem;
+  letter-spacing: 0.42em;
+  color: var(--accent);
+  margin-bottom: 16px;
+  text-indent: 0.42em;
+}
+.section-title {
+  font-size: clamp(1.6rem, 4.6vw, 2.2rem);
+  letter-spacing: 0.06em;
+}
+.section-desc {
+  color: var(--text-dim);
+  font-size: 0.98rem;
+  margin-top: 14px;
+}
+
+/* ============ 服务卡片 ============ */
+.cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: clamp(18px, 3vw, 32px);
+}
+.card {
+  border-radius: var(--radius-card);
+  overflow: hidden;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-soft);
+  transition: transform 0.35s var(--ease), box-shadow 0.35s var(--ease);
+}
+.card:hover { transform: translateY(-6px); box-shadow: var(--shadow-lift); }
+.card-img {
+  height: 180px;
+  background-size: cover;
+  background-position: center;
+  position: relative;
+}
+.card-img::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, transparent 40%, color-mix(in srgb, var(--bg) 55%, transparent) 100%);
+}
+.card-icon {
+  width: 120px;
+  height: 120px;
+  margin: 20px auto 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+.card-icon svg { width: 52px; height: 52px; }
+.card-body { padding: 26px 26px 32px; }
+.card-title {
+  font-size: 1.15rem;
+  letter-spacing: 0.06em;
+  margin-bottom: 10px;
+}
+.card-text {
+  font-size: 0.92rem;
+  color: var(--text-dim);
+  line-height: 1.85;
+  margin-bottom: 18px;
+}
+.card-link {
+  font-size: 0.9rem;
+  color: var(--accent);
+  letter-spacing: 0.08em;
+}
+.card-link span { display: inline-block; transition: transform 0.3s var(--ease); }
+.card:hover .card-link span { transform: translateX(6px); }
+
+@media (max-width: 860px) {
+  .cards {
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    gap: 16px;
+    margin: 0 -24px;
+    padding: 4px 24px 20px;
+    -webkit-overflow-scrolling: touch;
+  }
+  .cards::-webkit-scrollbar { display: none; }
+  .card { flex: 0 0 78%; scroll-snap-align: center; }
+}
+
+/* ============ 报告封面（SoulCode） ============ */
+.report {
+  display: grid;
+  grid-template-columns: 1.05fr 1fr;
+  gap: clamp(32px, 6vw, 72px);
+  align-items: center;
+}
+.report-img {
+  border-radius: var(--radius-card);
+  overflow: hidden;
+  box-shadow: var(--shadow-lift);
+  border: 1px solid var(--border);
+}
+.report-copy .section-kicker { text-align: left; text-indent: 0; }
+.report-title {
+  font-size: clamp(1.5rem, 4vw, 2rem);
+  letter-spacing: 0.06em;
+  margin-bottom: 20px;
+}
+.report-text {
+  color: var(--text-dim);
+  font-size: 0.96rem;
+  margin-bottom: 32px;
+  max-width: 32em;
+}
+.report-cta {
+  display: inline-block;
+  border: 1px solid var(--accent);
+  color: var(--accent);
+  padding: 13px 36px;
+  border-radius: var(--radius-pill);
+  letter-spacing: 0.1em;
+  font-size: 0.95rem;
+  transition: background 0.3s var(--ease), color 0.3s var(--ease), transform 0.3s var(--ease);
+}
+.report-cta:hover { background: var(--accent); color: var(--btn-text); transform: translateY(-2px); }
+@media (max-width: 860px) {
+  .report { grid-template-columns: 1fr; }
+}
+
+/* ============ 更多探索（横向滑动小卡） ============ */
+.explore-track {
+  display: flex;
+  gap: 16px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  margin: 0 -24px;
+  padding: 4px 24px 20px;
+  -webkit-overflow-scrolling: touch;
+}
+.explore-track::-webkit-scrollbar { display: none; }
+.explore-card {
+  flex: 0 0 auto;
+  scroll-snap-align: start;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  padding: 12px 26px 12px 14px;
+  transition: transform 0.3s var(--ease), border-color 0.3s var(--ease);
+}
+.explore-card:hover { transform: translateY(-3px); border-color: var(--accent); }
+.explore-ico {
+  width: 40px; height: 40px;
+  border-radius: 50%;
+  background: var(--accent-soft);
+  color: var(--accent);
+  display: flex; align-items: center; justify-content: center;
+  flex: 0 0 auto;
+}
+.explore-ico svg { width: 20px; height: 20px; }
+.explore-name { font-size: 0.92rem; letter-spacing: 0.06em; white-space: nowrap; }
+
+/* ============ 关于区 ============ */
+.about {
+  display: grid;
+  grid-template-columns: 120px 1fr;
+  gap: clamp(24px, 5vw, 48px);
+  align-items: center;
+  max-width: 780px;
+  margin: 0 auto;
+}
+.about-avatar {
+  width: 120px; height: 120px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: var(--accent-soft);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--accent);
+  overflow: hidden;
+}
+.about-avatar svg { width: 52px; height: 52px; }
+.about-name { font-size: 1.12rem; letter-spacing: 0.08em; margin-bottom: 6px; }
+.about-role { font-size: 0.85rem; color: var(--accent); letter-spacing: 0.14em; margin-bottom: 12px; }
+.about-text { color: var(--text-dim); font-size: 0.94rem; }
+@media (max-width: 640px) {
+  .about { grid-template-columns: 1fr; text-align: center; }
+  .about-avatar { margin: 0 auto; width: 96px; height: 96px; }
+}
+
+/* ============ 页脚 ============ */
+.footer {
+  border-top: 1px solid var(--border);
+  padding: 56px 24px 40px;
+}
+.footer-inner {
+  max-width: var(--maxw);
+  margin: 0 auto;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 36px;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+.footer-brand { max-width: 300px; }
+.footer-logo { font-size: 1.1rem; letter-spacing: 0.18em; margin-bottom: 12px; }
+.footer-logo em { color: var(--accent); font-style: normal; }
+.footer-slogan { font-size: 0.88rem; color: var(--text-dim); }
+.footer-links { display: flex; gap: clamp(32px, 6vw, 72px); }
+.footer-col h4 {
+  font-size: 0.85rem;
+  letter-spacing: 0.2em;
+  color: var(--text-dim);
+  margin-bottom: 14px;
+  font-weight: 400;
+}
+.footer-col a {
+  display: block;
+  font-size: 0.9rem;
+  padding: 4px 0;
+  color: var(--text);
+  opacity: 0.85;
+  transition: color 0.3s var(--ease);
+}
+.footer-col a:hover { color: var(--accent); opacity: 1; }
+.footer-social { display: flex; gap: 14px; }
+.social-btn {
+  width: 42px; height: 42px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--text-dim);
+  transition: all 0.3s var(--ease);
+}
+.social-btn:hover { color: var(--accent); border-color: var(--accent); transform: translateY(-3px); }
+.social-btn svg { width: 19px; height: 19px; }
+.footer-copy {
+  text-align: center;
+  font-size: 0.78rem;
+  color: var(--text-dim);
+  opacity: 0.7;
+  margin-top: 44px;
+  letter-spacing: 0.08em;
+}
+
+/* ============ 入场动效 ============ */
+.reveal {
+  opacity: 0;
+  transform: translateY(28px);
+  transition: opacity 0.8s var(--ease), transform 0.8s var(--ease);
+}
+.reveal.in { opacity: 1; transform: none; }
+
+/* ============================================================
+   移动端排版精修（≤640px）
+   原则：收窄字距、统一节奏、对齐边缘、避免参差换行
+   ============================================================ */
+@media (max-width: 640px) {
+
+  /* ---- 导航 ---- */
+  .nav { padding: 14px 20px; }
+  .nav-logo { font-size: 1.02rem; letter-spacing: 0.12em; }
+  .nav-links { gap: 14px; font-size: 0.85rem; }
+  .nav-links .nav-cta { padding: 3px 14px; }
+
+  /* ---- Hero：字距收窄，避免标题末字被顶出、行尾参差 ---- */
+  .hero { padding: 104px 24px 96px; }
+  .hero-kicker {
+    font-size: 0.75rem;
+    letter-spacing: 0.32em;
+    text-indent: 0.32em;
+    margin-bottom: 22px;
+  }
+  .hero-title {
+    font-size: clamp(1.9rem, 8.6vw, 2.4rem);
+    letter-spacing: 0.04em;   /* 窄屏不再用 0.08em，防止视觉右偏 */
+    line-height: 1.5;
+    margin-bottom: 18px;
+    text-wrap: balance;       /* 换行时两行长度均衡 */
+  }
+  .hero-sub {
+    font-size: 0.95rem;
+    line-height: 1.9;
+    margin-bottom: 40px;
+    text-wrap: balance;
+  }
+  .hero-cta { padding: 13px 38px; font-size: 0.95rem; }
+  .hero-scroll { font-size: 0.72rem; letter-spacing: 0.24em; }
+
+  /* ---- 区块节奏统一 ---- */
+  .section { padding: 64px 20px; }
+  .section-head { margin-bottom: 40px; }
+  .section-kicker { font-size: 0.72rem; letter-spacing: 0.3em; text-indent: 0.3em; }
+  .section-title {
+    font-size: 1.35rem;
+    letter-spacing: 0.03em;
+    line-height: 1.55;
+    text-wrap: balance;
+  }
+  .section-desc { font-size: 0.9rem; margin-top: 10px; padding: 0 8px; }
+
+  /* ---- 服务卡片：内容对齐、行高收紧 ---- */
+  .card-body { padding: 20px 22px 26px; }
+  .card-title { font-size: 1.05rem; letter-spacing: 0.03em; margin-bottom: 8px; }
+  .card-text { font-size: 0.88rem; line-height: 1.8; margin-bottom: 14px; }
+  .card-icon { width: 88px; height: 88px; margin: 16px auto 0; }
+  .card-icon svg { width: 40px; height: 40px; }
+  .card-img { height: 150px; }
+
+  /* ---- 报告区 ---- */
+  .report-title { font-size: 1.35rem; letter-spacing: 0.03em; margin-bottom: 16px; }
+  .report-text { font-size: 0.9rem; line-height: 1.85; margin-bottom: 26px; text-wrap: pretty; }
+  .report-copy .section-kicker { text-indent: 0; }
+  .report-copy { text-align: left; }
+
+  /* ---- 更多探索横栏 ---- */
+  .explore-track { margin: 0 -20px; padding: 4px 20px 16px; gap: 12px; }
+  .explore-card { padding: 10px 20px 10px 12px; gap: 10px; }
+  .explore-ico { width: 36px; height: 36px; }
+  .explore-name { font-size: 0.88rem; letter-spacing: 0.03em; }
+
+  /* ---- 关于区 ---- */
+  .about { gap: 20px; }
+  .about-avatar { width: 88px; height: 88px; }
+  .about-name { font-size: 1.05rem; letter-spacing: 0.04em; }
+  .about-role { font-size: 0.8rem; letter-spacing: 0.08em; margin-bottom: 10px; }
+  .about-text { font-size: 0.9rem; line-height: 1.85; text-wrap: balance; }
+
+  /* ---- 页脚：纵向堆叠、居中、间距统一 ---- */
+  .footer { padding: 44px 20px 32px; }
+  .footer-inner {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 28px;
+  }
+  .footer-brand { max-width: none; }
+  .footer-logo { font-size: 1rem; letter-spacing: 0.12em; margin-bottom: 8px; }
+  .footer-slogan { font-size: 0.84rem; line-height: 1.8; }
+  .footer-links { gap: 44px; }
+  .footer-col h4 { font-size: 0.78rem; letter-spacing: 0.16em; margin-bottom: 10px; }
+  .footer-col a { font-size: 0.86rem; padding: 5px 0; }
+  .footer-social { gap: 12px; }
+  .social-btn { width: 40px; height: 40px; }
+  .footer-copy { margin-top: 32px; font-size: 0.74rem; line-height: 1.8; }
+}

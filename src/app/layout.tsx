@@ -4,7 +4,6 @@ import "@jianji/ui/styles/theme.css";
 import "./globals.css";
 import { Navbar, Footer } from "@/components/ui-client";
 import { Sparkles } from "lucide-react";
-import Link from "next/link";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -64,13 +63,14 @@ export default function RootLayout({
         />
 
         <Navbar
+          className="stella-global-nav"
           logo={
-            <Link href="/" className="flex items-center gap-2 no-underline">
+            <span className="flex items-center gap-2 no-underline">
               <div className="w-7 h-7 rounded-md bg-[var(--color-accent)] flex items-center justify-center">
                 <Sparkles className="w-4 h-4 text-white" />
               </div>
               <span className="font-semibold text-[var(--color-text)]">Stella教育智囊</span>
-            </Link>
+            </span>
           }
           links={[
             { label: "课程学习", href: "/courses" },
@@ -83,6 +83,7 @@ export default function RootLayout({
         <main className="min-h-screen">{children}</main>
 
         <Footer
+          className="stella-global-footer"
           brand="Stella教育智囊"
           description="基于Stella老师20年教育经验，融合系统思维、冰山理论、品格教育，为家长提供AI驱动的家庭教育支持。"
           columns={[
@@ -107,7 +108,7 @@ export default function RootLayout({
         />
 
         {/* ── R5: 三站通路 → soulcode 入口 ── */}
-        <div style={{ textAlign: 'center', padding: '8px', fontSize: '12px', color: '#888' }}>
+        <div className="stella-global-rail" style={{ textAlign: 'center', padding: '8px', fontSize: '12px', color: '#888' }}>
           <a href="https://aisoulcode.cn" target="_blank" rel="noopener noreferrer"
              style={{ color: '#5a7a6a', textDecoration: 'none', marginRight: '16px' }}>
             🔮 灵魂解码 — 七系统AI融合报告
@@ -115,7 +116,7 @@ export default function RootLayout({
           <span style={{ color: '#ccc' }}>|</span>
           <span style={{ marginLeft: '16px', color: '#aaa' }}>见己学园 · 即将上线</span>
         </div>
-        <footer style={{ textAlign: 'center', padding: '16px', fontSize: '12px', color: '#888' }}>
+        <footer className="stella-global-rail" style={{ textAlign: 'center', padding: '16px', fontSize: '12px', color: '#888' }}>
           <a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer"
              style={{ color: '#888', textDecoration: 'none' }}>
             粤ICP备2026087672号-1
