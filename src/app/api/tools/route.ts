@@ -1,18 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
-import { authGetUser, dbGet, dbList, dbInsert } from "@/lib/supabase";
-
-async function getProfile(token: string) {
-  const user = await authGetUser(token);
-  return dbGet("profiles", `auth_id=eq.${user.id}`, "id,nickname");
-}
+import { dbList, dbInsert } from "@/lib/supabase";
+import { getProfileForToken, parseBearerToken } from "@/lib/request-auth";
 
 export async function GET(req: NextRequest) {
   try {
-    const auth = req.headers.get("Authorization");
-    if (!auth) return NextResponse.json({ error: "未登录" }, { status: 401 });
+    const token = parseBearerToken(req.headers.get("Authorization"));
+    if (!token) return NextResponse.json({ error: "未登录" }, { status: 401 });
 
     let profile: any;
-    try { profile = await getProfile(auth.replace("Bearer ", "")); }
+    try { profile = await getProfileForToken(token); }
     catch { return NextResponse.json({ error: "未登录" }, { status: 401 }); }
     if (!profile) return NextResponse.json({ error: "档案不存在" }, { status: 404 });
 
@@ -23,7 +19,7 @@ export async function GET(req: NextRequest) {
     const vis = url.searchParams.get("visibility");
     if (vis) filter += `&visibility=eq.${vis}`;
 
-    const records = await dbList("tool_records", filter);
+    const records = await dbList("tool_records", filter, token);
     return NextResponse.json({ records });
   } catch (e) {
     console.error("GET tools error:", e);
@@ -33,11 +29,11 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
-    const auth = req.headers.get("Authorization");
-    if (!auth) return NextResponse.json({ error: "未登录" }, { status: 401 });
+    const token = parseBearerToken(req.headers.get("Authorization"));
+    if (!token) return NextResponse.json({ error: "未登录" }, { status: 401 });
 
     let profile: any;
-    try { profile = await getProfile(auth.replace("Bearer", "")); }
+    try { profile = await getProfileForToken(token); }
     catch { return NextResponse.json({ error: "未登录" }, { status: 401 }); }
     if (!profile) return NextResponse.json({ error: "档案不存在" }, { status: 404 });
 
@@ -45,7 +41,7 @@ export async function POST(req: NextRequest) {
     const record = await dbInsert("tool_records", {
       user_id: profile.id, tool_type: toolType, title: title || "",
       content: content || {}, visibility: visibility || "private", tags: tags || [],
-    });
+    }, token);
     return NextResponse.json({ record });
   } catch (e) {
     console.error("POST tools error:", e);

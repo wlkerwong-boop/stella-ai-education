@@ -1,19 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
-import { authGetUser, dbGet, dbList, dbInsert } from "@/lib/supabase";
-
-async function getProfile(token: string) {
-  const user = await authGetUser(token);
-  return dbGet("profiles", `auth_id=eq.${user.id}`, "id,nickname");
-}
+import { dbList, dbInsert } from "@/lib/supabase";
+import { getProfileForToken, parseBearerToken } from "@/lib/request-auth";
 
 export async function GET(req: NextRequest) {
   try {
-    const auth = req.headers.get("Authorization");
-    if (!auth) return NextResponse.json({ error: "未登录" }, { status: 401 });
+    const token = parseBearerToken(req.headers.get("Authorization"));
+    if (!token) return NextResponse.json({ error: "未登录" }, { status: 401 });
 
     let profile: any;
     try {
-      profile = await getProfile(auth.replace("Bearer ", ""));
+      profile = await getProfileForToken(token);
     } catch {
       return NextResponse.json({ error: "未登录" }, { status: 401 });
     }
@@ -26,23 +22,22 @@ export async function GET(req: NextRequest) {
     const status = url.searchParams.get("status");
     if (status) filter += `&status=eq.${status}`;
 
-    const records = await dbList("tool_usage_records", filter);
+    const records = await dbList("tool_usage_records", filter, token);
     return NextResponse.json({ records });
   } catch (e) {
     console.error("GET tool_usage error:", e);
-    // 表可能不存在 → dev fallback
-    return NextResponse.json({ records: [], dev_mode: true });
+    return NextResponse.json({ error: "获取失败" }, { status: 500 });
   }
 }
 
 export async function POST(req: NextRequest) {
   try {
-    const auth = req.headers.get("Authorization");
-    if (!auth) return NextResponse.json({ error: "未登录" }, { status: 401 });
+    const token = parseBearerToken(req.headers.get("Authorization"));
+    if (!token) return NextResponse.json({ error: "未登录" }, { status: 401 });
 
     let profile: any;
     try {
-      profile = await getProfile(auth.replace("Bearer ", ""));
+      profile = await getProfileForToken(token);
     } catch {
       return NextResponse.json({ error: "未登录" }, { status: 401 });
     }
@@ -60,19 +55,11 @@ export async function POST(req: NextRequest) {
       growth_event_id: body.growth_event_id || null,
       visibility: body.visibility || "private",
       status: body.status || "completed",
-    });
+    }, token);
 
     return NextResponse.json({ record });
   } catch (e) {
     console.error("POST tool_usage error:", e);
-    // 表可能不存在 → dev fallback
-    return NextResponse.json({
-      record: {
-        ...(await req.json().catch(() => ({}))),
-        id: `dev-${Date.now()}`,
-        created_at: new Date().toISOString(),
-      },
-      dev_mode: true,
-    });
+    return NextResponse.json({ error: "创建失败" }, { status: 500 });
   }
 }

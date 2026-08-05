@@ -1,33 +1,52 @@
-import { NextRequest, NextResponse } from "next/server";
-import { dbUpdate, dbDelete } from "@/lib/supabase";
+import { NextResponse, type NextRequest } from 'next/server';
+import { dbDelete, dbUpdate } from '@/lib/supabase';
+import { getProfileForToken, parseBearerToken } from '@/lib/request-auth';
+
+async function authenticate(request: NextRequest) {
+  const token = parseBearerToken(request.headers.get('Authorization'));
+  if (!token) return null;
+  const profile = await getProfileForToken(token);
+  return profile ? { profile, token } : null;
+}
 
 export async function PUT(
-  req: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const auth = await authenticate(request);
+    if (!auth) return NextResponse.json({ error: '未登录' }, { status: 401 });
     const { id } = await params;
-    const body = await req.json();
-    const filter = `id=eq.${id}`;
-    await dbUpdate("tool_usage_records", body, filter);
+    const body = await request.json();
+    await dbUpdate(
+      'tool_usage_records',
+      body,
+      `id=eq.${id}&user_id=eq.${auth.profile.id}`,
+      auth.token
+    );
     return NextResponse.json({ success: true });
-  } catch (e) {
-    console.error("PUT tool_usage error:", e);
-    return NextResponse.json({ success: true, dev_mode: true });
+  } catch (error) {
+    console.error('PUT tool_usage error:', error);
+    return NextResponse.json({ error: '更新失败' }, { status: 500 });
   }
 }
 
 export async function DELETE(
-  req: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const auth = await authenticate(request);
+    if (!auth) return NextResponse.json({ error: '未登录' }, { status: 401 });
     const { id } = await params;
-    const filter = `id=eq.${id}`;
-    await dbDelete("tool_usage_records", filter);
+    await dbDelete(
+      'tool_usage_records',
+      `id=eq.${id}&user_id=eq.${auth.profile.id}`,
+      auth.token
+    );
     return NextResponse.json({ success: true });
-  } catch (e) {
-    console.error("DELETE tool_usage error:", e);
-    return NextResponse.json({ success: true, dev_mode: true });
+  } catch (error) {
+    console.error('DELETE tool_usage error:', error);
+    return NextResponse.json({ error: '删除失败' }, { status: 500 });
   }
 }

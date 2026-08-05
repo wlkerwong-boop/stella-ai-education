@@ -1,3 +1,5 @@
+import { createClient } from '@/lib/supabase/client';
+
 // 学员工具台数据存储
 // 支持：Supabase API（优先）+ localStorage（向后兼容）
 
@@ -28,34 +30,27 @@ export interface StudentUser {
 
 // ====== 认证相关 ======
 
-export function getSession(): { access_token: string } | null {
-  if (typeof window === "undefined") return null;
-  try {
-    const data = localStorage.getItem("stella_session");
-    return data ? JSON.parse(data) : null;
-  } catch {
-    return null;
-  }
+export async function getSession(): Promise<{ access_token: string } | null> {
+  const supabase = createClient();
+  if (!supabase) return null;
+  const { data } = await supabase.auth.getSession();
+  return data.session ? { access_token: data.session.access_token } : null;
 }
 
 export function getCurrentStudent(): StudentUser | null {
   if (typeof window === "undefined") return null;
-  // 优先用 Supabase session
-  const session = getSession();
-  if (session) {
-    try {
-      const userData = localStorage.getItem("stella_user");
-      if (userData) {
-        const u = JSON.parse(userData);
-        return {
-          userId: u.id || u.userId,
-          inviteCode: u.invite_code || "",
-          nickname: u.nickname,
-          createdAt: Date.now(),
-        };
-      }
-    } catch {}
-  }
+  try {
+    const userData = localStorage.getItem("stella_user");
+    if (userData) {
+      const u = JSON.parse(userData);
+      return {
+        userId: u.id || u.userId,
+        inviteCode: u.invite_code || "",
+        nickname: u.nickname,
+        createdAt: u.created_at ? new Date(u.created_at).getTime() : Date.now(),
+      };
+    }
+  } catch {}
   // 回退到旧的 localStorage 方式
   try {
     const data = localStorage.getItem("stella_student_user");
@@ -66,7 +61,8 @@ export function getCurrentStudent(): StudentUser | null {
 }
 
 export function logoutStudent() {
-  localStorage.removeItem("stella_session");
+  const supabase = createClient();
+  if (supabase) void supabase.auth.signOut();
   localStorage.removeItem("stella_user");
   localStorage.removeItem("stella_student_user");
   localStorage.removeItem("stella_tool_records");
@@ -75,7 +71,7 @@ export function logoutStudent() {
 // ====== API 调用（带 Supabase session） ======
 
 async function apiFetch(url: string, options: RequestInit = {}) {
-  const session = getSession();
+  const session = await getSession();
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
     ...(options.headers as Record<string, string> || {}),

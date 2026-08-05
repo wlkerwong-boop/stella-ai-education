@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import { StellaAuthProvider } from "@/components/StellaAuthProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -19,8 +20,12 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: "Stella教育智囊 - AI时代的家庭教育伙伴",
-  description: "基于Stella老师20多年教育经验，为家长提供系统化的教育问答、成长图谱和在线学习平台",
+  title:
+    process.env.NEXT_PUBLIC_HIDE_AI === "true"
+      ? "Stella教育智囊 - 家庭教育伙伴"
+      : "Stella教育智囊 - AI时代的家庭教育伙伴",
+  description:
+    "基于Stella老师20多年教育经验，为家长提供系统化的教育问答、成长图谱和在线学习平台",
   manifest: "/manifest.json",
   icons: {
     icon: [
@@ -58,22 +63,24 @@ export default function RootLayout({
             `,
           }}
         />
-        {children}
-        {/* ── R5: 三站通路 → soulcode 入口 ── */}
-        <div style={{ textAlign: 'center', padding: '8px', fontSize: '12px', color: '#888' }}>
-          <a href="https://aisoulcode.cn" target="_blank" rel="noopener noreferrer"
-             style={{ color: '#5a7a6a', textDecoration: 'none', marginRight: '16px' }}>
-            🔮 灵魂解码 — 七系统AI融合报告
-          </a>
-          <span style={{ color: '#ccc' }}>|</span>
-          <span style={{ marginLeft: '16px', color: '#aaa' }}>见己学园 · 即将上线</span>
-        </div>
-        <footer style={{ textAlign: 'center', padding: '16px', fontSize: '12px', color: '#888' }}>
-          <a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer"
-             style={{ color: '#888', textDecoration: 'none' }}>
-            粤ICP备2026087672号-1
-          </a>
-        </footer>
+        <StellaAuthProvider>
+          {children}
+          {/* ── R5: 三站通路 → soulcode 入口 ── */}
+          <div style={{ textAlign: 'center', padding: '8px', fontSize: '12px', color: '#888' }}>
+            <a href="https://aisoulcode.cn" target="_blank" rel="noopener noreferrer"
+               style={{ color: '#5a7a6a', textDecoration: 'none', marginRight: '16px' }}>
+              🔮 灵魂解码 — 七系统AI融合报告
+            </a>
+            <span style={{ color: '#ccc' }}>|</span>
+            <span style={{ marginLeft: '16px', color: '#aaa' }}>见己学园 · 即将上线</span>
+          </div>
+          <footer style={{ textAlign: 'center', padding: '16px', fontSize: '12px', color: '#888' }}>
+            <a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer"
+               style={{ color: '#888', textDecoration: 'none' }}>
+              粤ICP备2026087672号-1
+            </a>
+          </footer>
+        </StellaAuthProvider>
       </body>
     </html>
   );

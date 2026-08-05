@@ -136,17 +136,12 @@ async function apiFetch(url: string, options: RequestInit = {}) {
     "Content-Type": "application/json",
     ...(options.headers as Record<string, string> || {}),
   };
-  // 尝试从 session 获取 token
-  if (typeof window !== "undefined") {
-    try {
-      const sessionData = localStorage.getItem("stella_session");
-      if (sessionData) {
-        const session = JSON.parse(sessionData);
-        if (session.access_token) {
-          headers["Authorization"] = `Bearer ${session.access_token}`;
-        }
-      }
-    } catch {}
+  const supabase = createClient();
+  if (supabase) {
+    const { data } = await supabase.auth.getSession();
+    if (data.session?.access_token) {
+      headers["Authorization"] = `Bearer ${data.session.access_token}`;
+    }
   }
   const res = await fetch(url, { ...options, headers });
   if (!res.ok) {
@@ -174,3 +169,4 @@ export async function getToolUsageAPI(): Promise<ToolUsageRecord[]> {
 export async function withdrawToolUsageAPI(id: string): Promise<void> {
   await apiFetch(`/api/tools/usage/${id}`, { method: "DELETE" });
 }
+import { createClient } from '@/lib/supabase/client';
