@@ -53,6 +53,8 @@ const STAGES = [
 ];
 
 export default function GrowthPage() {
+  // 公安备案期间隐藏 AI 对话入口（构建时 NEXT_PUBLIC_HIDE_AI=true）
+  const HIDE_AI = process.env.NEXT_PUBLIC_HIDE_AI === "true";
   const [sessions, setSessions] = useState<ChatSession[]>([]);
   const [stats, setStats] = useState({
     totalQuestions: 0,
@@ -169,6 +171,7 @@ export default function GrowthPage() {
               当您与Stella老师进行对话后，这里会自动记录您的教育认知成长轨迹。
               从"问题导向"到"系统思维"，看见自己的每一步进化。
             </p>
+            {!HIDE_AI && (
             <Link
               href="/chat"
               className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-[#c4753f] text-white font-medium hover:bg-[#a86235] transition-colors"
@@ -176,6 +179,7 @@ export default function GrowthPage() {
               <Sparkles className="w-4 h-4" />
               开始第一次对话
             </Link>
+            )}
           </motion.div>
         ) : (
           <>
@@ -466,12 +470,14 @@ export default function GrowthPage() {
                           {formatDate(session.updatedAt)}
                         </div>
                       </div>
+                      {!HIDE_AI && (
                       <Link
                         href="/chat"
                         className="text-xs text-[#5a7a6a] hover:text-[#2d2a26] transition-colors flex-shrink-0"
                       >
                         继续
                       </Link>
+                      )}
                     </div>
                   </div>
                 ))}

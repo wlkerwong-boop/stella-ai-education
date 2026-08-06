@@ -236,6 +236,8 @@ const features = [
 ];
 
 export default function CoursesPage() {
+  // 公安备案期间隐藏 AI 对话入口（构建时 NEXT_PUBLIC_HIDE_AI=true）
+  const HIDE_AI = process.env.NEXT_PUBLIC_HIDE_AI === "true";
   return (
     <div className="min-h-screen bg-[#faf8f5]">
       <Navbar />
@@ -371,12 +373,14 @@ export default function CoursesPage() {
             <button className="px-8 py-3 rounded-full bg-white text-[#c4753f] font-medium hover:bg-[#faf8f5] transition-colors">
               了解报名方式
             </button>
+            {!HIDE_AI && (
             <Link
               href="/chat"
               className="px-8 py-3 rounded-full border-2 border-white text-white font-medium hover:bg-white/10 transition-colors"
             >
               先免费咨询
             </Link>
+            )}
           </div>
         </div>
       </section>

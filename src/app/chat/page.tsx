@@ -127,6 +127,11 @@ export default function ChatPage() {
 
   // 加载本地存储的会话
   useEffect(() => {
+    // 公安备案期间隐藏 AI 对话（构建时 NEXT_PUBLIC_HIDE_AI=true）
+    if (process.env.NEXT_PUBLIC_HIDE_AI === "true") {
+      window.location.replace("/");
+      return;
+    }
     const saved = getCurrentSession();
     if (saved && saved.messages.length > 0) {
       setMessages(

@@ -14,6 +14,8 @@ const navLinks = [
 export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const pathname = usePathname();
+  // 公安备案期间隐藏 AI 对话入口（构建时 NEXT_PUBLIC_HIDE_AI=true）
+  const HIDE_AI = process.env.NEXT_PUBLIC_HIDE_AI === "true";
 
   const isActive = (href: string) => pathname === href;
 
@@ -43,6 +45,7 @@ export default function Navbar() {
               {link.label}
             </Link>
           ))}
+          {!HIDE_AI && (
           <Link
             href="/chat"
             className="flex items-center gap-2 px-4 py-2 rounded-full bg-[#c4753f] text-white text-sm hover:bg-[#a86235] transition-colors"
@@ -50,6 +53,7 @@ export default function Navbar() {
             <MessageCircle className="w-4 h-4" />
             开始咨询
           </Link>
+          )}
         </div>
 
         {/* Mobile Hamburger */}
@@ -80,6 +84,7 @@ export default function Navbar() {
                 {link.label}
               </Link>
             ))}
+            {!HIDE_AI && (
             <Link
               href="/chat"
               onClick={() => setMobileOpen(false)}
@@ -88,6 +93,7 @@ export default function Navbar() {
               <MessageCircle className="w-4 h-4" />
               开始咨询
             </Link>
+            )}
           </div>
         </div>
       )}

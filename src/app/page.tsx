@@ -15,6 +15,8 @@ import {
 import Navbar from "@/components/Navbar";
 
 export default function Home() {
+  // 公安备案期间隐藏 AI 对话入口（构建时 NEXT_PUBLIC_HIDE_AI=true）
+  const HIDE_AI = process.env.NEXT_PUBLIC_HIDE_AI === "true";
   return (
     <div className="min-h-screen bg-[#faf8f5]">
       <Navbar />
@@ -64,14 +66,16 @@ export default function Home() {
             transition={{ duration: 0.6, delay: 0.3 }}
             className="flex flex-col sm:flex-row items-center justify-center gap-4"
           >
-            <Link
-              href="/chat"
-              className="flex items-center gap-2 px-8 py-4 rounded-full bg-gradient-to-r from-[#c4753f] to-[#b06a38] text-white font-medium shadow-lg shadow-[#c4753f]/20 hover:-translate-y-0.5 hover:shadow-xl transition-all group"
-            >
-              <MessageCircle className="w-5 h-5" />
-              免费向Stella老师提问
-              <ArrowRight className="w-4 h-4" />
-            </Link>
+            {!HIDE_AI && (
+              <Link
+                href="/chat"
+                className="flex items-center gap-2 px-8 py-4 rounded-full bg-gradient-to-r from-[#c4753f] to-[#b06a38] text-white font-medium shadow-lg shadow-[#c4753f]/20 hover:-translate-y-0.5 hover:shadow-xl transition-all group"
+              >
+                <MessageCircle className="w-5 h-5" />
+                免费向Stella老师提问
+                <ArrowRight className="w-4 h-4" />
+              </Link>
+            )}
             <Link
               href="/courses"
               className="flex items-center gap-2 px-8 py-4 rounded-full border-2 border-[#e8e4df] text-[#2d2a26] font-medium hover:border-[#c4753f] hover:text-[#c4753f] transition-colors"
@@ -101,6 +105,7 @@ export default function Home() {
 
           <div className="grid md:grid-cols-3 gap-8">
             {/* Feature 1 */}
+            {!HIDE_AI && (
             <Link href="/chat" className="block">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -133,6 +138,7 @@ export default function Home() {
               </div>
             </motion.div>
             </Link>
+            )}
 
             {/* Feature 2 */}
             <Link href="/growth" className="block">
@@ -261,6 +267,7 @@ export default function Home() {
         <div className="max-w-4xl mx-auto">
           <div className="grid md:grid-cols-2 gap-8">
             {/* 免费试听 */}
+            {!HIDE_AI && (
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -283,6 +290,7 @@ export default function Home() {
                 <ArrowRight className="w-4 h-4" />
               </Link>
             </motion.div>
+            )}
 
             {/* 领取邀请码 */}
             <motion.div
@@ -321,6 +329,7 @@ export default function Home() {
           <p className="text-white/80 mb-8">
             每一个愿意学习和成长的家长，都已经给了孩子最好的礼物
           </p>
+          {!HIDE_AI && (
           <Link
             href="/chat"
             className="inline-flex items-center gap-2 px-8 py-4 rounded-full bg-white text-[#c4753f] font-medium hover:bg-[#faf8f5] transition-colors shadow-lg"
@@ -329,6 +338,7 @@ export default function Home() {
             免费开始咨询
             <ArrowRight className="w-4 h-4" />
           </Link>
+          )}
         </div>
       </section>
 
