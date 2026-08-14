@@ -79,6 +79,12 @@ export default function RootLayout({
                style={{ color: '#888', textDecoration: 'none' }}>
               粤ICP备2026087672号-1
             </a>
+            {" "}·{" "}
+            <a href="https://beian.mps.gov.cn/#/query/webSearch?code=44030002015573" target="_blank" rel="noreferrer"
+               style={{ color: '#888', textDecoration: 'none' }}>
+              <img src="/beian.png" alt="公安备案" style={{ width: 18, height: 20, verticalAlign: 'middle', marginRight: 4 }} />
+              粤公网安备44030002015573号
+            </a>
           </footer>
         </StellaAuthProvider>
       </body>
